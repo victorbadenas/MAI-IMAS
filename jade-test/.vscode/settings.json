@@ -1,0 +1,13 @@
+{
+	"java.project.referencedLibraries": [
+		"lib/**/*.jar",
+		"/Users/victor/Desktop/jade/lib/jade.jar",
+		"c:\\Program Files\\JADE\\lib\\jade.jar"
+	],
+	"files.exclude": {
+		"**/.classpath": true,
+		"**/.project": true,
+		"**/.settings": true,
+		"**/.factorypath": true
+	}
+}
