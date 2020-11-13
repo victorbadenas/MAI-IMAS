@@ -26,3 +26,13 @@ APDescription.txt
 MTPs-Main-Container.txt
 
 .vscode
+
+# Jade
+.DS_Store
+.idea
+lib-cov
+testing
+node_modules
+coverage
+npm-debug.log
+/test/output
