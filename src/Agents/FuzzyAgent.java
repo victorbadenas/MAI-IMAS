@@ -1,39 +1,42 @@
 package Agents;
 import Behaviours.FIPAReciever;
+import Utils.InferenceResult;
 import jade.core.*;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
-import jade.util.Logger;
+import net.sourceforge.jFuzzyLogic.FIS;
+
 
 public class FuzzyAgent extends Agent {
-    private Logger myLogger = Logger.getMyLogger(getClass().getName());
+    private String fisFileName;
+    private FIS fis;
 
-    protected void setup() {
-        // saying hello to the world
-        System.out.println();
+    protected void setup(String fisFileName) {
+        this.fisFileName = fisFileName;
         System.out.println("Initializing User Agent with name: " + getAID().getLocalName());
-        System.out.println();
 
-        DFAgentDescription dfd = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType("FuzzyAgent");
-        sd.setName(getName());
-        sd.setOwnership("imas-platform");
-        dfd.setName(getAID());
-        dfd.addServices(sd);
-        try {
-            DFService.register(this, dfd);
-            addBehaviour(new FIPAReciever(this));
-        } catch (FIPAException e) {
-            myLogger.log(Logger.SEVERE, "[" + getLocalName() + "] - Cannot register with DF", e);
-            doDelete();
-        }
+        System.out.println("Loading FIS file from: " + this.fisFileName);
+        this.fis = FIS.load(this.fisFileName);
+        System.out.println("FIS file loaded!");
+
+        this.addBehaviour(new FIPAReciever(this));
     }
 
     @Override
     protected void takeDown() {
         super.takeDown();
+        fis = null;
+        fisFileName = null;
+        System.gc();
+    }
+
+    protected InferenceResult inferFCL(double humidity, double temperature) {
+        try{
+            this.fis.setVariable("humidity", humidity);
+            this.fis.setVariable("temperature", temperature);
+            this.fis.evaluate();
+            return new InferenceResult(true, this.fis.getVariable("output").getLatestDefuzzifiedValue());
+        } catch (Exception e) {
+            System.out.println(String.format("ERROR: Error found when infering %d and %d", humidity, temperature));
+            return new InferenceResult(false, this.fis.getVariable("output").getLatestDefuzzifiedValue());
+        }
     }
 }

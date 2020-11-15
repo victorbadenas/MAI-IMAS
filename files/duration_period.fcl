@@ -34,7 +34,15 @@ END_DEFUZZIFY
 RULEBLOCK No1
 	ACCU : MAX;
 	AND : MIN;
-	RULE 1: IF temperature IS Burning AND humidity IS Moist THEN duration_period IS Medium;
+	RULE 1: IF temperature IS Cold AND humidity IS Dry THEN duration_period IS Medium;
+	RULE 2: IF temperature IS Normal AND humidity IS Dry THEN duration_period IS Long;
+	RULE 3: IF temperature IS Burning AND humidity IS Dry THEN duration_period IS Long;
+	RULE 4: IF temperature IS Cold AND humidity IS Moist THEN duration_period IS Short;
+	RULE 5: IF temperature IS Normal AND humidity IS Moist THEN duration_period IS Medium;
+	RULE 6: IF temperature IS Burning AND humidity IS Moist THEN duration_period IS Long;
+	RULE 7: IF temperature IS Cold AND humidity IS Wet THEN duration_period IS Short;
+	RULE 8: IF temperature IS Normal AND humidity IS Wet THEN duration_period IS Short;
+	RULE 9: IF temperature IS Burning AND humidity IS Wet THEN duration_period IS Medium;
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK
