@@ -1,3 +1,5 @@
+package Agents;
+
 import Behaviours.WaitHumanPetitions;
 import jade.core.Agent;
 import jade.domain.DFService;

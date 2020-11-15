@@ -16,6 +16,6 @@ public class WaitHumanPetitions extends CyclicBehaviour {
 
         System.out.println("Sending petition to Manager: " + petition);
         // send petition to Manager Agent
-        // wait message from ManagerAgent
+        // wait message from Agents.ManagerAgent
     }
 }
