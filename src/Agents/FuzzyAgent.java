@@ -29,15 +29,24 @@ public class FuzzyAgent extends Agent {
         System.gc();
     }
 
-    protected InferenceResult inferFCL(double humidity, double temperature) {
+    public double[] parseDoubleMessage(String message, String separator){
+        String[] parts = message.split(separator);
+        double[] doubleParts = new double[parts.length];
+        for(int i=0; i<parts.length; i++) {
+            doubleParts[i] = Double.parseDouble(parts[i]);
+        }
+        return doubleParts;
+    }
+
+    public InferenceResult inferFCL(double humidity, double temperature) {
         try{
             this.fis.setVariable("humidity", humidity);
             this.fis.setVariable("temperature", temperature);
             this.fis.evaluate();
-            return new InferenceResult(true, this.fis.getVariable("output").getLatestDefuzzifiedValue());
+            return new InferenceResult(true, this.fis.getVariable("duration_period").getLatestDefuzzifiedValue());
         } catch (Exception e) {
             System.out.println(String.format("ERROR: Error found when infering %d and %d", humidity, temperature));
-            return new InferenceResult(false, this.fis.getVariable("output").getLatestDefuzzifiedValue());
+            return new InferenceResult(false, this.fis.getVariable("duration_period").getLatestDefuzzifiedValue());
         }
     }
 }
