@@ -21,8 +21,8 @@ public class FIPAReciever extends CyclicBehaviour {
 
     public FIPAReciever(FuzzyAgent a) {
         super(a);
-        myAgent = a;
-        state = ReceiverState.IDLE;
+        this.myAgent = a;
+        this.state = ReceiverState.IDLE;
     }
 
     @Override
@@ -30,32 +30,54 @@ public class FIPAReciever extends CyclicBehaviour {
         ACLMessage msg;
         switch(state) {
             case IDLE:
-                msg = myAgent.blockingReceive();
+                msg = this.myAgent.blockingReceive();
                 if (msg != null) {
-                    // infer
+                    try {
+                        if (msg.getPerformative() == ACLMessage.REQUEST){
+                            this.requestMsg = msg;
+                            String args = msg.getContent();
+
+                            double[] inferenceArguments = myAgent.parseDoubleMessage(args, " ");
+
+                            ACLMessage response = msg.createReply();
+                            response.setPerformative(ACLMessage.AGREE);
+                            this.myAgent.send(response);
+
+                            InferenceResult res = myAgent.inferFCL(inferenceArguments[0], inferenceArguments[1]);
+                            if (res.isSuccessful()) {
+                                this.state = ReceiverState.SUCCESS;
+                            }
+                            else {
+                                this.state = ReceiverState.FAILED;
+                            }
+                            this.result = res.getResult();
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case FAILED:
-                ACLMessage resultFailed = requestMsg.createReply();
+                ACLMessage resultFailed = this.requestMsg.createReply();
                 resultFailed.setPerformative(ACLMessage.FAILURE);
-                resultFailed.setContent((String) result);
-                myAgent.send(resultFailed);
-                state = ReceiverState.IDLE;
+                resultFailed.setContent((String) this.result);
+                this.myAgent.send(resultFailed);
+                this.state = ReceiverState.IDLE;
                 break;
 
             case SUCCESS:
                 try {
-                    ACLMessage resultSuccess = requestMsg.createReply();
+                    ACLMessage resultSuccess = this.requestMsg.createReply();
                     resultSuccess.setPerformative(ACLMessage.INFORM);
-                    resultSuccess.setContentObject(result);
-                    myAgent.send(resultSuccess);
-                    state = ReceiverState.IDLE;
+                    resultSuccess.setContentObject(this.result);
+                    this.myAgent.send(resultSuccess);
+                    this.state = ReceiverState.IDLE;
                 }
                 catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
         }
-        System.out.println("testing reciever");
     }
 }
