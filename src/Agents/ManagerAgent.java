@@ -1,7 +1,9 @@
 package Agents;
 
 import Agents.FuzzyAgent;
-import Behaviours.ReceiverBehaviour;
+//import Behaviours.ReceiverBehaviour;
+import Behaviours.ManagerBehaviour;
+import Behaviours.Utils;
 import Utils.Config;
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -23,19 +25,16 @@ public class ManagerAgent extends Agent {
     private String aggregation;
 
     protected void setup() {
-        // saying hello to the world
-        System.out.println();
-        System.out.println("Initializing Manager Agent with name: " + getAID().getLocalName());
-        System.out.println();
+        Utils.log(this, "Hello World!");
 
-        // registering agent to DF
         DFAgentDescription dfd = new DFAgentDescription();
         try {
             DFService.register(this,dfd);
         } catch (FIPAException e) {
             e.printStackTrace();
         }
-        this.addBehaviour(new ReceiverBehaviour(this));
+
+        this.addBehaviour(new ManagerBehaviour(this));
     }
 
     public void createFuzzyAgents(Config config) {
