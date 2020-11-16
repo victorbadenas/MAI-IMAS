@@ -1,3 +1,6 @@
+package Agents;
+
+import Behaviours.Utils;
 import Behaviours.WaitHumanPetitions;
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -7,9 +10,7 @@ import jade.domain.FIPAException;
 public class UserAgent extends Agent {
     protected void setup() {
         // saying hello to the world
-        System.out.println();
-        System.out.println("Initializing User Agent with name: " + getAID().getLocalName());
-        System.out.println();
+        Utils.log(this, "Hello World!");
 
         // registering agent to DF
         DFAgentDescription dfd = new DFAgentDescription();
@@ -19,6 +20,6 @@ public class UserAgent extends Agent {
             e.printStackTrace();
         }
 
-        this.addBehaviour(new WaitHumanPetitions());
+        this.addBehaviour(new WaitHumanPetitions(this));
     }
 }

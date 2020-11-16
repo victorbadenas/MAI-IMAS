@@ -1,3 +1,7 @@
+package Agents;
+
+import Behaviours.ManagerBehaviour;
+import Behaviours.Utils;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -6,9 +10,7 @@ import jade.domain.FIPAException;
 public class ManagerAgent extends Agent {
     protected void setup() {
         // saying hello to the world
-        System.out.println();
-        System.out.println("Initializing Manager Agent with name: " + getAID().getLocalName());
-        System.out.println();
+        Utils.log(this, "Hello World!");
 
         // registering agent to DF
         DFAgentDescription dfd = new DFAgentDescription();
@@ -17,5 +19,7 @@ public class ManagerAgent extends Agent {
         } catch (FIPAException e) {
             e.printStackTrace();
         }
+
+        this.addBehaviour(new ManagerBehaviour(this));
     }
 }
