@@ -45,6 +45,7 @@ public class FuzzyAgent extends Agent {
             doDelete();
         }
     }
+
     private void loadFis() throws ExceptionInInitializerError{
         Utils.log(this, "Loading FIS file from: " + this.fisFileName);
         try {
@@ -90,6 +91,11 @@ public class FuzzyAgent extends Agent {
     @Override
     protected void takeDown() {
         Utils.log(this, "Killing fuzzy agent with FIS file: " + this.fisFileName);
+        try {
+            DFService.deregister(this);
+        } catch (FIPAException e) {
+            e.printStackTrace();
+        }
         super.takeDown();
         fis = null;
         fisFileName = null;
