@@ -5,12 +5,17 @@ import Utils.Utils;
 import jade.core.*;
 import net.sourceforge.jFuzzyLogic.FIS;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 
 public class FuzzyAgent extends Agent {
     private String fisFileName;
     private FIS fis;
+    private String[] inputVariableNames;
+    private String[] outputVariableNames;
 
-    protected void setup() {
+    protected void setup() throws ExceptionInInitializerError{
         Object[] args = getArguments();
         String fcl = args[0].toString();
         this.fisFileName = "files/" + fcl + ".fcl";
@@ -19,15 +24,46 @@ public class FuzzyAgent extends Agent {
         this.addBehaviour(new FIPAReciever(this));
     }
 
-    private void loadFis(){
+    private void loadFis() throws ExceptionInInitializerError{
         Utils.log(this, "Loading FIS file from: " + this.fisFileName);
         try {
             this.fis = FIS.load(this.fisFileName);
+            if (this.fis == null) {
+                throw new ExceptionInInitializerError("FIS loading has returned null");
+            }
+            this.getInputVariableNames();
+            this.getOutputVariableNames();
             Utils.log(this, "FIS file loaded!");
         } catch (Exception e) {
             Utils.error(this, "FIS loading FAILED");
             Utils.error(this, e.getMessage());
         }
+    }
+
+    private void getInputVariableNames() {
+        ArrayList<String> inputVariablesList = new ArrayList<String>();
+        String[] fisData = this.fis.toStringFcl().split("\n");
+        for (int i = Arrays.asList(fisData).indexOf("VAR_INPUT") + 1; i<fisData.length; i++){
+            if (fisData[i].equals("END_VAR")){
+                break;
+            }
+            String element = fisData[i].replace("\t", "").split(":")[0].replace(" ","");
+            inputVariablesList.add(element);
+        }
+        this.inputVariableNames = inputVariablesList.toArray(new String[0]);
+    }
+
+    private void getOutputVariableNames() {
+        ArrayList<String> outputVariableList = new ArrayList<String>();
+        String[] fisData = this.fis.toStringFcl().split("\n");
+        for (int i = Arrays.asList(fisData).indexOf("VAR_OUTPUT") + 1; i<fisData.length; i++){
+            if (fisData[i].equals("END_VAR")){
+                break;
+            }
+            String element = fisData[i].replace("\t", "").split(":")[0].replace(" ","");
+            outputVariableList.add(element);
+        }
+        this.outputVariableNames = outputVariableList.toArray(new String[0]);
     }
 
     @Override
@@ -46,7 +82,7 @@ public class FuzzyAgent extends Agent {
         try {
             parts = message.split(separator);
             doubleParts = new double[parts.length];
-            for(int i=0; i<parts.length; i++) {
+            for(int i = 0; i < parts.length; i++) {
                 doubleParts[i] = Double.parseDouble(parts[i]);
             }
         } catch (Exception e) {
@@ -56,20 +92,27 @@ public class FuzzyAgent extends Agent {
         return doubleParts;
     }
 
-    public InferenceResult inferFCL(double humidity, double temperature) {
-        Utils.log(this, String.format("Infering from data: %f, %f", humidity, temperature));
+    public InferenceResult inferFCL(double[] inputValues) {
+        double[] outputValues = new double[this.outputVariableNames.length];
+        Utils.log(this, String.format("Inferring from data: " + Utils.arrayToString(inputValues)));
+        try {
+            for (int i=0; i< this.inputVariableNames.length; i++) {
+                this.fis.setVariable(this.inputVariableNames[i], inputValues[i]);
+            }
 
-        try{
-            this.fis.setVariable("humidity", humidity);
-            this.fis.setVariable("temperature", temperature);
             this.fis.evaluate();
-            double numericalResult = this.fis.getVariable("duration_period").getLatestDefuzzifiedValue();
-            Utils.log(this, String.format("Infered correctly. Result: %f", numericalResult));
-            return new InferenceResult(true, numericalResult);
+
+            for (int i=0; i < this.outputVariableNames.length; i++) {
+                outputValues[i] = this.fis.getVariable(this.outputVariableNames[i]).getLatestDefuzzifiedValue();
+            }
+
+            Utils.log(this, String.format("Inferred correctly. Result: " + Utils.arrayToString(outputValues)));
+
+            return new InferenceResult(true, outputValues);
         } catch (Exception e) {
-            Utils.error(this, String.format("ERROR: Error found when infering %f and %f", humidity, temperature));
+            Utils.error(this, String.format("ERROR: Error found when inferring"));
             Utils.error(this, e.getMessage());
-            return new InferenceResult(false, this.fis.getVariable("duration_period").getLatestDefuzzifiedValue());
+            return new InferenceResult(false, new double[0]);
         }
     }
 }

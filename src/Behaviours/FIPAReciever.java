@@ -40,13 +40,15 @@ public class FIPAReciever extends CyclicBehaviour {
 
                             double[] inferenceArguments = this.myAgent.parseDoubleMessage(args, ",");
 
-                            InferenceResult res = this.myAgent.inferFCL(inferenceArguments[0], inferenceArguments[1]);
+                            InferenceResult res = this.myAgent.inferFCL(inferenceArguments);
                             if (res.isSuccessful()) {
                                 this.state = ReceiverState.SUCCESS;
                             } else {
                                 this.state = ReceiverState.FAILED;
                             }
-                            this.result = res.getResult();
+                            // force only to return one value even if the fuzzy system is returning more than one
+                            // TODO: replace this with this.result = res.getValueString(); that will return the csv
+                            this.result = String.valueOf(res.getResult()[0]);
                         }
                     } catch (Exception e) {
                         Utils.error(this.myAgent, String.format("Error in message %s", msg));
