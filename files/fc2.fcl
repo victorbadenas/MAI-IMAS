@@ -1,0 +1,55 @@
+FUNCTION_BLOCK fc2
+
+VAR_INPUT
+	humidity : REAL; (* RANGE(0.0 45.0) *)
+	temperature : REAL; (* RANGE(0.0 30.0) *)
+END_VAR
+
+VAR_OUTPUT
+	duration_period : REAL; (* RANGE(0.0 70.0) *)
+END_VAR
+
+FUZZIFY humidity
+	TERM Dry := (0.0, 1.0) (9.0, 1.0) (13.0, 0.0);
+	TERM Moist := (5.0, 0.0) (14.0, 1.0) (21.0, 0.0);
+	TERM Wet := (18.0, 0.0) (21.0, 1.0) (30.0, 1.0);
+END_FUZZIFY
+
+FUZZIFY temperature
+	TERM Cold := (0.0, 1.0) (5.0, 1.0) (10.0, 0.0);
+	TERM Mild := (5.0, 0.0) (13.0, 1.0) (21.0, 0.0);
+	TERM Normal := (15.0, 0.0) (22.0, 1.0) (27.0, 0.0);
+	TERM Hot := (24.0, 0.0) (30.0, 1.0) (36.0, 0.0);
+	TERM Burning := (32.0, 0.0) (39.0, 1.0) (45.0, 1.0);
+END_FUZZIFY
+
+DEFUZZIFY duration_period
+	TERM Short := (0.0, 1.0) (10.0, 1.0) (20.0, 0.0);
+	TERM Medium := (10.0, 0.0) (32.0, 1.0) (50.0, 0.0);
+	TERM Long := (40.0, 0.0) (50.0, 1.0) (70.0, 1.0);
+	METHOD: COG;
+	DEFAULT := 0.0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	ACCU : MAX;
+	AND : MIN;
+	RULE 1: IF temperature IS Cold AND humidity IS Dry THEN duration_period IS Medium;
+	RULE 2: IF temperature IS Mild AND humidity IS Dry THEN duration_period IS Medium;
+	RULE 3: IF temperature IS Normal AND humidity IS Dry THEN duration_period IS Medium;
+	RULE 4: IF temperature IS Hot AND humidity IS Dry THEN duration_period IS Long;
+	RULE 5: IF temperature IS Burning AND humidity IS Dry THEN duration_period IS Long;
+	RULE 6: IF temperature IS Cold AND humidity IS Moist THEN duration_period IS Short;
+	RULE 7: IF temperature IS Mild AND humidity IS Moist THEN duration_period IS Short;
+	RULE 8: IF temperature IS Normal AND humidity IS Moist THEN duration_period IS Medium;
+	RULE 9: IF temperature IS Hot AND humidity IS Moist THEN duration_period IS Medium;
+	RULE 10: IF temperature IS Burning AND humidity IS Moist THEN duration_period IS Long;
+	RULE 11: IF temperature IS Cold AND humidity IS Wet THEN duration_period IS Short;
+	RULE 12: IF temperature IS Mild AND humidity IS Wet THEN duration_period IS Short;
+	RULE 13: IF temperature IS Normal AND humidity IS Wet THEN duration_period IS Short;
+	RULE 14: IF temperature IS Hot AND humidity IS Wet THEN duration_period IS Medium;
+	RULE 15: IF temperature IS Burning AND humidity IS Wet THEN duration_period IS Medium;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

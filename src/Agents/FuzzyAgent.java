@@ -12,8 +12,7 @@ public class FuzzyAgent extends Agent {
     protected void setup() {
         Object[] args = getArguments();
         String fcl = args[0].toString();
-        //this.fisFileName = "files/" + fcl;
-        this.fisFileName = "files/duration_period.fcl";
+        this.fisFileName = "files/" + fcl + ".fcl";
         System.out.println("Initializing User Agent with name: " + getAID().getLocalName());
 
         System.out.println("Loading FIS file from: " + this.fisFileName);
