@@ -3,6 +3,10 @@ import Behaviours.FIPAReciever;
 import Utils.InferenceResult;
 import Utils.Utils;
 import jade.core.*;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import net.sourceforge.jFuzzyLogic.FIS;
 
 import java.util.ArrayList;
@@ -21,9 +25,26 @@ public class FuzzyAgent extends Agent {
         this.fisFileName = "files/" + fcl + ".fcl";
         Utils.log(this, "Initializing User Agent with name: " + getAID().getLocalName());
         this.loadFis();
+        this.register();
         this.addBehaviour(new FIPAReciever(this));
     }
 
+    private void register() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType("FuzzyAgent");
+        sd.setName(getName());
+        sd.setOwnership("IMAS_group");
+        dfd.setName(getAID());
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(this,dfd);
+        } catch (FIPAException e) {
+            e.printStackTrace();
+            doDelete();
+        }
+    }
     private void loadFis() throws ExceptionInInitializerError{
         Utils.log(this, "Loading FIS file from: " + this.fisFileName);
         try {
