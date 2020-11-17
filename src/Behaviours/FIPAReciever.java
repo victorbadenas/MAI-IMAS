@@ -46,7 +46,9 @@ public class FIPAReciever extends CyclicBehaviour {
                             } else {
                                 this.state = ReceiverState.FAILED;
                             }
-                            this.result = res.getResultString();
+                            // force only to return one value even if the fuzzy system is returning more than one
+                            // TODO: replace this with this.result = res.getValueString(); that will return the csv
+                            this.result = String.valueOf(res.getResult()[0]);
                         }
                     } catch (Exception e) {
                         Utils.error(this.myAgent, String.format("Error in message %s", msg));
