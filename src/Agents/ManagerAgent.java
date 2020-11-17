@@ -1,9 +1,7 @@
 package Agents;
 
 import Agents.FuzzyAgent;
-//import Behaviours.ReceiverBehaviour;
 import Behaviours.ManagerBehaviour;
-import Utils.utils;
 import Utils.Config;
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -21,27 +19,29 @@ import java.util.Set;
 public class ManagerAgent extends Agent {
 
     private class AgentConfig {
-        private HashMap<String, ArrayList<double>> results;
+        private HashMap<String, ArrayList<Double>> results;
         private String aggregation;
 
         public AgentConfig(String aggregation) {
-            this.results = new HashMap<_>();
+            this.results = new HashMap<String, ArrayList<Double>>();
             this.aggregation = aggregation;
         }
 
         public void addFuzzyAgent(String name) {
-            this.results.put(name, new ArrayList<double>());
+            this.results.put(name, new ArrayList<Double>());
         }
 
-        public void addResult(String name, double result) {
-            this.results.put(name, result);
+        public void addResult(String name, Double result) {
+            if (this.results.get(name) != null) {
+                this.results.get(name).add(result);
+            }
         }
 
-        public void getAggregation() {
+        public String getAggregation() {
             return this.aggregation;
         }
 
-        public ArrayList<double> getResults(String name) {
+        public ArrayList<Double> getResults(String name) {
             return this.results.get(name);
         } 
     }
@@ -49,6 +49,7 @@ public class ManagerAgent extends Agent {
     HashMap<String, AgentConfig> fuzzyAgents;
 
     protected void setup() {
+        this.fuzzyAgents = new HashMap<String, AgentConfig>();
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("ManagerAgent");
@@ -80,13 +81,11 @@ public class ManagerAgent extends Agent {
         String[] fuzzySettings = config.getFuzzySettings().split(",");
         ContainerController cc = getContainerController();
         this.fuzzyAgents.put(config.getApplication(), new AgentConfig(config.getAggregation()));
-
         for (int i = 0; i < config.getFuzzyAgents(); i++) {
             try {
-                Object args = new Object[1];
-                args[0] = fuzzySettings[i];
+                Object[] args = new Object[] {fuzzySettings[i]};
                 String agentName = new String("FuzzyAgent" + String.valueOf(i));
-                this.fuzzyAgent.get(config.getApplication()).addFuzzyAgent(agentName);
+                this.fuzzyAgents.get(config.getApplication()).addFuzzyAgent(agentName);
                 AgentController ac = cc.createNewAgent(agentName, "Agents.FuzzyAgent", args);
                 try {
                     ac.start();
@@ -107,7 +106,7 @@ public class ManagerAgent extends Agent {
         }
     }
 
-    public void addResult(String application, String fuzzyAgent, double result) {
+    public void addResult(String application, String fuzzyAgent, Double result) {
         if (this.fuzzyAgents.get(application) != null) {
             this.fuzzyAgents.get(application).addResult(fuzzyAgent, result);
         }
@@ -120,7 +119,7 @@ public class ManagerAgent extends Agent {
         return new String();
     }
 
-    public ArrayList<double> getResults(String application, String fuzzyAgent) {
+    public ArrayList<Double> getResults(String application, String fuzzyAgent) {
         if (this.fuzzyAgents.get(application) != null) {
             return this.fuzzyAgents.get(application).getResults(fuzzyAgent);
         }

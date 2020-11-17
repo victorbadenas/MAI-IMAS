@@ -37,11 +37,7 @@ public class FIPAReciever extends CyclicBehaviour {
                             this.requestMsg = msg;
                             String args = msg.getContent();
 
-                            double[] inferenceArguments = myAgent.parseDoubleMessage(args, " ");
-
-                            ACLMessage response = msg.createReply();
-                            response.setPerformative(ACLMessage.AGREE);
-                            this.myAgent.send(response);
+                            double[] inferenceArguments = myAgent.parseDoubleMessage(args, ",");
 
                             InferenceResult res = myAgent.inferFCL(inferenceArguments[0], inferenceArguments[1]);
                             if (res.isSuccessful()) {
@@ -61,22 +57,17 @@ public class FIPAReciever extends CyclicBehaviour {
             case FAILED:
                 ACLMessage resultFailed = this.requestMsg.createReply();
                 resultFailed.setPerformative(ACLMessage.FAILURE);
-                resultFailed.setContent((String) this.result);
+                resultFailed.setContent(String.valueOf(this.result));
                 this.myAgent.send(resultFailed);
                 this.state = ReceiverState.IDLE;
                 break;
 
             case SUCCESS:
-                try {
-                    ACLMessage resultSuccess = this.requestMsg.createReply();
-                    resultSuccess.setPerformative(ACLMessage.INFORM);
-                    resultSuccess.setContent((String) this.result);
-                    this.myAgent.send(resultSuccess);
-                    this.state = ReceiverState.IDLE;
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ACLMessage resultSuccess = this.requestMsg.createReply();
+                resultSuccess.setPerformative(ACLMessage.INFORM);
+                resultSuccess.setContent(String.valueOf(this.result));
+                this.myAgent.send(resultSuccess);
+                this.state = ReceiverState.IDLE;
                 break;
         }
     }

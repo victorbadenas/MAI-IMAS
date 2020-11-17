@@ -1,6 +1,6 @@
 package Behaviours;
 
-import Utils.utils;
+import Utils.Utils;
 import Agents.UserAgent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -27,24 +27,24 @@ public class WaitHumanPetitions extends CyclicBehaviour {
         Scanner sc = new Scanner(System.in);
         String petition;
         do {
-            log(myAgent, "Waiting for a human petition...");
+            Utils.log(myAgent, "Waiting for a human petition...");
             petition = sc.next();
-        } while (!validPetition(petition, this.state));
+        } while (!Utils.validPetition(myAgent, petition, this.state.ordinal()));
 
-        this.state = INITIALIZED;
-        sendMessage(myAgent, ACLMessage.REQUEST, "ManagerAgent@imas-platform", petition);
+        this.state = InitiatorState.INITIALIZED;
+        Utils.sendMessage(myAgent, ACLMessage.REQUEST, "ManagerAgent@imas-platform", petition);
 
         if (petition.startsWith("I_")) {
             // wait message from Agents.ManagerAgent
-            ACLMessage response = receiveMessage(myAgent);
+            ACLMessage response = Utils.receiveMessage(myAgent);
             if (response.getPerformative() == ACLMessage.CONFIRM) {
-                log(myAgent, "The system has been successfully initialized.");
+                Utils.log(myAgent, "The system has been successfully initialized.");
             }
         } else {
-            ACLMessage response = receiveMessage(myAgent);
+            ACLMessage response = Utils.receiveMessage(myAgent);
             //TODO: Here we should show the final results
             if (response.getPerformative() == ACLMessage.CONFIRM) {
-                log(myAgent, "The final results are in file '" + response.getContent() + "'.");
+                Utils.log(myAgent, "The final results are in file '" + response.getContent() + "'.");
             }
         }
     }
