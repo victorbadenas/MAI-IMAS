@@ -1,4 +1,4 @@
-FUNCTION_BLOCK duration_period
+FUNCTION_BLOCK fc1
 
 VAR_INPUT
 	humidity : REAL; (* RANGE(0.0 45.0) *)
