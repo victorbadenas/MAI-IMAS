@@ -40,13 +40,13 @@ public class FIPAReciever extends CyclicBehaviour {
 
                             double[] inferenceArguments = this.myAgent.parseDoubleMessage(args, ",");
 
-                            InferenceResult res = this.myAgent.inferFCL(inferenceArguments[0], inferenceArguments[1]);
+                            InferenceResult res = this.myAgent.inferFCL(inferenceArguments);
                             if (res.isSuccessful()) {
                                 this.state = ReceiverState.SUCCESS;
                             } else {
                                 this.state = ReceiverState.FAILED;
                             }
-                            this.result = res.getResult();
+                            this.result = res.getResultString();
                         }
                     } catch (Exception e) {
                         Utils.error(this.myAgent, String.format("Error in message %s", msg));

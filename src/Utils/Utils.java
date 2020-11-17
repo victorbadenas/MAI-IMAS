@@ -123,4 +123,12 @@ public class Utils {
   public static void error (Agent a, String message) {
     myLogger.log(Logger.SEVERE, String.format(logFormat, a.getLocalName(), message));
   }
+
+  public static String arrayToString (double[] doubleArray){
+    StringBuilder sb = new StringBuilder();
+    for (double s : doubleArray) {
+      sb.append(String.valueOf(s)).append(",");
+    }
+    return sb.deleteCharAt(sb.length() - 1).toString();
+  }
 }

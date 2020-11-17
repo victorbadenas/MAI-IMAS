@@ -1,10 +1,11 @@
 package Utils;
+import Utils.Utils;
 
 public class InferenceResult {
     private boolean successful = false;
-    private double result = -1.0d;
+    private double[] result = {};
 
-    public InferenceResult(boolean successful, double result){
+    public InferenceResult(boolean successful, double[] result){
         this.successful = successful;
         this.result = result;
     }
@@ -13,7 +14,11 @@ public class InferenceResult {
         return successful;
     }
 
-    public double getResult() {
+    public double[] getResult() {
         return result;
+    }
+
+    public String getResultString() {
+        return Utils.arrayToString(this.result);
     }
 }
