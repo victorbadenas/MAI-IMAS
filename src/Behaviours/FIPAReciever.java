@@ -1,10 +1,11 @@
 package Behaviours;
 import Agents.FuzzyAgent;
 import Utils.InferenceResult;
+import Utils.Utils;
+
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 enum ReceiverState {
@@ -30,7 +31,7 @@ public class FIPAReciever extends CyclicBehaviour {
         ACLMessage msg;
         switch(state) {
             case IDLE:
-                msg = this.myAgent.blockingReceive();
+                msg = Utils.receiveMessage(this.myAgent);
                 if (msg != null) {
                     try {
                         if (msg.getPerformative() == ACLMessage.REQUEST){
@@ -55,18 +56,12 @@ public class FIPAReciever extends CyclicBehaviour {
                 }
                 break;
             case FAILED:
-                ACLMessage resultFailed = this.requestMsg.createReply();
-                resultFailed.setPerformative(ACLMessage.FAILURE);
-                resultFailed.setContent(String.valueOf(this.result));
-                this.myAgent.send(resultFailed);
+                Utils.sendReply(this.myAgent, this.requestMsg, ACLMessage.FAILURE, String.valueOf(this.result));
                 this.state = ReceiverState.IDLE;
                 break;
 
             case SUCCESS:
-                ACLMessage resultSuccess = this.requestMsg.createReply();
-                resultSuccess.setPerformative(ACLMessage.INFORM);
-                resultSuccess.setContent(String.valueOf(this.result));
-                this.myAgent.send(resultSuccess);
+                Utils.sendReply(this.myAgent, this.requestMsg, ACLMessage.INFORM, String.valueOf(this.result));
                 this.state = ReceiverState.IDLE;
                 break;
         }
