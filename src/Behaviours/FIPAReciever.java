@@ -70,7 +70,7 @@ public class FIPAReciever extends CyclicBehaviour {
                 try {
                     ACLMessage resultSuccess = this.requestMsg.createReply();
                     resultSuccess.setPerformative(ACLMessage.INFORM);
-                    resultSuccess.setContentObject(this.result);
+                    resultSuccess.setContent((String) this.result);
                     this.myAgent.send(resultSuccess);
                     this.state = ReceiverState.IDLE;
                 }
