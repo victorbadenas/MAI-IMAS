@@ -3,6 +3,6 @@
    <title>IMAS_medium_simulation</title>  
    <application>qualityservice</application>  
    <fuzzyagents>4</fuzzyagents >
-   <fuzzySettings>fcl3,fcl4,fcl5,fcl6</fuzzySettings>
+   <fuzzySettings>fcl1,fcl2,fcl1,fcl2</fuzzySettings>
    <aggregation>average</aggregation>
 </SimulationSettings>

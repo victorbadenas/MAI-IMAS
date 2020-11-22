@@ -13,6 +13,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ManagerAgent extends Agent {
     HashMap<String, AppConfig> applications;
@@ -55,7 +56,8 @@ public class ManagerAgent extends Agent {
         AgentController[] agentControllers = new AgentController[appConfig.getNumberOfAgents()];
         for (int i = 0; i < fuzzySettings.length; i++) {
             Object[] args = new Object[]{fuzzySettings[i]};
-            fuzzyAgents[i] = "FuzzyAgent" + i;
+            UUID uuid = UUID.randomUUID();
+            fuzzyAgents[i] = "FuzzyAgent_" + i + "_" + appConfig.getApplication() + "_" + uuid;
             try {
                 agentControllers[i] = cc.createNewAgent(fuzzyAgents[i], "Agents.FuzzyAgent", args);
                 try {
