@@ -1,7 +1,7 @@
 package Agents;
-import Behaviours.FIPAReciever;
+import Behaviours.FuzzyAgentBehaviour;
 import Utils.InferenceResult;
-import Utils.Utils;
+import Utils.Helper;
 import jade.core.*;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -23,10 +23,10 @@ public class FuzzyAgent extends Agent {
         Object[] args = getArguments();
         String fcl = args[0].toString();
         this.fisFileName = "files/" + fcl + ".fcl";
-        Utils.log(this, "Initializing User Agent with name: " + getAID().getLocalName());
+        Helper.log(this, "Initializing User Agent with name: " + getAID().getLocalName());
         this.loadFis();
         this.register();
-        this.addBehaviour(new FIPAReciever(this));
+        this.addBehaviour(new FuzzyAgentBehaviour(this));
     }
 
     private void register() {
@@ -47,7 +47,7 @@ public class FuzzyAgent extends Agent {
     }
 
     private void loadFis() throws ExceptionInInitializerError{
-        Utils.log(this, "Loading FIS file from: " + this.fisFileName);
+        Helper.log(this, "Loading FIS file from: " + this.fisFileName);
         try {
             this.fis = FIS.load(this.fisFileName);
             if (this.fis == null) {
@@ -55,10 +55,10 @@ public class FuzzyAgent extends Agent {
             }
             this.getInputVariableNames();
             this.getOutputVariableNames();
-            Utils.log(this, "FIS file loaded!");
+            Helper.log(this, "FIS file loaded!");
         } catch (Exception e) {
-            Utils.error(this, "FIS loading FAILED");
-            Utils.error(this, e.getMessage());
+            Helper.error(this, "FIS loading FAILED");
+            Helper.error(this, e.getMessage());
         }
     }
 
@@ -90,7 +90,7 @@ public class FuzzyAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        Utils.log(this, "Killing fuzzy agent with FIS file: " + this.fisFileName);
+        Helper.log(this, "Killing fuzzy agent with FIS file: " + this.fisFileName);
         try {
             DFService.deregister(this);
         } catch (FIPAException e) {
@@ -100,7 +100,7 @@ public class FuzzyAgent extends Agent {
         fis = null;
         fisFileName = null;
         System.gc();
-        Utils.log(this, "Agent killed.");
+        Helper.log(this, "Agent killed.");
     }
 
     public double[] parseDoubleMessage(String message, String separator){
@@ -113,15 +113,15 @@ public class FuzzyAgent extends Agent {
                 doubleParts[i] = Double.parseDouble(parts[i]);
             }
         } catch (Exception e) {
-            Utils.error(this, String.format("Value parsing failed. Expected comma separated values. Recieved %s", message));
-            Utils.error(this, e.getMessage());
+            Helper.error(this, String.format("Value parsing failed. Expected comma separated values. Recieved %s", message));
+            Helper.error(this, e.getMessage());
         }
         return doubleParts;
     }
 
     public InferenceResult inferFCL(double[] inputValues) {
         double[] outputValues = new double[this.outputVariableNames.length];
-        Utils.log(this, String.format("Inferring from data: " + Utils.arrayToString(inputValues)));
+        Helper.log(this, "Inferring from data: " + Helper.arrayToString(inputValues));
         try {
             for (int i=0; i< this.inputVariableNames.length; i++) {
                 this.fis.setVariable(this.inputVariableNames[i], inputValues[i]);
@@ -133,12 +133,12 @@ public class FuzzyAgent extends Agent {
                 outputValues[i] = this.fis.getVariable(this.outputVariableNames[i]).getLatestDefuzzifiedValue();
             }
 
-            Utils.log(this, String.format("Inferred correctly. Result: " + Utils.arrayToString(outputValues)));
+            Helper.log(this, "Inferred correctly. Result: " + Helper.arrayToString(outputValues));
 
             return new InferenceResult(true, outputValues);
         } catch (Exception e) {
-            Utils.error(this, String.format("ERROR: Error found when inferring"));
-            Utils.error(this, e.getMessage());
+            Helper.error(this, "ERROR: Error found when inferring");
+            Helper.error(this, e.getMessage());
             return new InferenceResult(false, new double[0]);
         }
     }

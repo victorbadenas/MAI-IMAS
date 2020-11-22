@@ -1,51 +1,41 @@
 package Behaviours;
 
-import Utils.Utils;
+import Utils.Helper;
 import Agents.UserAgent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
 import java.util.Scanner;
 
-enum InitiatorState {
-    IDLE,
-    INITIALIZED
-}
-
 public class WaitHumanPetitions extends CyclicBehaviour {
-    private UserAgent myAgent;
-    private InitiatorState state;
+    private final UserAgent myAgent;
 
     public WaitHumanPetitions(UserAgent a) {
         super(a);
         myAgent = a;
-        state = InitiatorState.IDLE;
     }
 
     @Override
     public void action() {
         Scanner sc = new Scanner(System.in);
-        String petition;
-        do {
-            Utils.log(myAgent, "Waiting for a human petition...");
+        String petition = null;
+        boolean validPetition = false;
+
+        while (!validPetition) {
+            Helper.log(myAgent, "Waiting for a human petition...");
             petition = sc.next();
-        } while (!Utils.validPetition(myAgent, petition, this.state.ordinal()));
-
-        this.state = InitiatorState.INITIALIZED;
-        Utils.sendMessage(myAgent, ACLMessage.REQUEST, "ManagerAgent@imas-platform", petition);
-
-        if (petition.startsWith("I_")) {
-            // wait message from Agents.ManagerAgent
-            ACLMessage response = Utils.receiveMessage(myAgent);
-            if (response.getPerformative() == ACLMessage.CONFIRM) {
-                Utils.log(myAgent, "The system has been successfully initialized.");
+            validPetition = Helper.isValidPetition(myAgent, petition);
+            if (!validPetition) {
+                Helper.error(myAgent, "Invalid petition! Try again.");
             }
+        }
+
+        Helper.sendMessage(myAgent, ACLMessage.REQUEST, "ManagerAgent@" + myAgent.getContainerController().getName(), petition);
+        ACLMessage response = Helper.receiveMessage(myAgent);
+        if (response.getPerformative() == ACLMessage.CONFIRM) {
+            Helper.log(myAgent, response.getContent());
         } else {
-            ACLMessage response = Utils.receiveMessage(myAgent);
-            //TODO: Here we should show the final results
-            if (response.getPerformative() == ACLMessage.CONFIRM) {
-                Utils.log(myAgent, "The final results are in file '" + response.getContent() + "'.");
-            }
+            Helper.error(myAgent, response.getContent());
         }
     }
 }

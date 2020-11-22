@@ -1,8 +1,8 @@
 package Agents;
 
-import Agents.FuzzyAgent;
 import Behaviours.ManagerBehaviour;
-import Utils.Config;
+import Utils.AppConfig;
+import Utils.Helper;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -12,44 +12,13 @@ import java.util.HashMap;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-
 import java.util.ArrayList;
-import java.util.Set;
 
 public class ManagerAgent extends Agent {
-
-    private class AgentConfig {
-        private HashMap<String, ArrayList<Double>> results;
-        private String aggregation;
-
-        public AgentConfig(String aggregation) {
-            this.results = new HashMap<String, ArrayList<Double>>();
-            this.aggregation = aggregation;
-        }
-
-        public void addFuzzyAgent(String name) {
-            this.results.put(name, new ArrayList<Double>());
-        }
-
-        public void addResult(String name, Double result) {
-            if (this.results.get(name) != null) {
-                this.results.get(name).add(result);
-            }
-        }
-
-        public String getAggregation() {
-            return this.aggregation;
-        }
-
-        public ArrayList<Double> getResults(String name) {
-            return this.results.get(name);
-        } 
-    }
-
-    HashMap<String, AgentConfig> fuzzyAgents;
+    HashMap<String, AppConfig> applications;
 
     protected void setup() {
-        this.fuzzyAgents = new HashMap<String, AgentConfig>();
+        this.applications = new HashMap<>();
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("ManagerAgent");
@@ -77,18 +46,20 @@ public class ManagerAgent extends Agent {
         super.takeDown();
     }
 
-    public void createFuzzyAgents(Config config) {
-        String[] fuzzySettings = config.getFuzzySettings().split(",");
+    public void createFuzzyAgents(AppConfig appConfig) {
+        this.killOldApp(appConfig.getApplication());
+
         ContainerController cc = getContainerController();
-        this.fuzzyAgents.put(config.getApplication(), new AgentConfig(config.getAggregation()));
-        for (int i = 0; i < config.getFuzzyAgents(); i++) {
+        String[] fuzzySettings = appConfig.getFuzzySettings();
+        String[] fuzzyAgents = new String[appConfig.getNumberOfAgents()];
+        AgentController[] agentControllers = new AgentController[appConfig.getNumberOfAgents()];
+        for (int i = 0; i < fuzzySettings.length; i++) {
+            Object[] args = new Object[]{fuzzySettings[i]};
+            fuzzyAgents[i] = "FuzzyAgent" + i;
             try {
-                Object[] args = new Object[] {fuzzySettings[i]};
-                String agentName = new String("FuzzyAgent" + String.valueOf(i));
-                this.fuzzyAgents.get(config.getApplication()).addFuzzyAgent(agentName);
-                AgentController ac = cc.createNewAgent(agentName, "Agents.FuzzyAgent", args);
+                agentControllers[i] = cc.createNewAgent(fuzzyAgents[i], "Agents.FuzzyAgent", args);
                 try {
-                    ac.start();
+                    agentControllers[i].start();
                 } catch (StaleProxyException e) {
                     e.printStackTrace();
                 }
@@ -96,32 +67,36 @@ public class ManagerAgent extends Agent {
                 e.printStackTrace();
             }
         }
+
+        appConfig.setControllers(agentControllers);
+        appConfig.setFuzzyAgents(fuzzyAgents);
+        this.applications.put(appConfig.getApplication(), appConfig);
     }
 
-    public int getFuzzyAgents(String application) {
-        if (this.fuzzyAgents.get(application) == null) {
-            return 0;
-        } else {
-            return this.fuzzyAgents.get(application).results.size();
+    private void killOldApp(String application) {
+        for (HashMap.Entry<String, AppConfig> app : applications.entrySet()) {
+            if (application.equals(app.getKey())) {
+                for (AgentController ac : app.getValue().getControllers()) {
+                    try {
+                        ac.kill();
+                    } catch (StaleProxyException e) {
+                        Helper.error(this, "Error while killing agent.");
+                    }
+                }
+            }
         }
     }
 
-    public void addResult(String application, String fuzzyAgent, Double result) {
-        if (this.fuzzyAgents.get(application) != null) {
-            this.fuzzyAgents.get(application).addResult(fuzzyAgent, result);
+    public boolean existsApplication(String application) {
+        for (HashMap.Entry<String, AppConfig> app : applications.entrySet()) {
+            if (application.equals(app.getKey())) return true;
         }
+        return false;
     }
 
-    public String getAggregation(String application) {
-        if (this.fuzzyAgents.get(application) != null) {
-            return this.fuzzyAgents.get(application).getAggregation();
-        }
-        return new String();
-    }
-
-    public ArrayList<Double> getResults(String application, String fuzzyAgent) {
-        if (this.fuzzyAgents.get(application) != null) {
-            return this.fuzzyAgents.get(application).getResults(fuzzyAgent);
+    public AppConfig getApplication(String application) {
+        for (HashMap.Entry<String, AppConfig> app : applications.entrySet()) {
+            if (application.equals(app.getKey())) return app.getValue();
         }
         return null;
     }

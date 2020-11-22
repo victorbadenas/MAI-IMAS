@@ -1,5 +1,4 @@
 package Utils;
-import Utils.Utils;
 
 public class InferenceResult {
     private boolean successful = false;
@@ -19,6 +18,6 @@ public class InferenceResult {
     }
 
     public String getResultString() {
-        return Utils.arrayToString(this.result);
+        return Helper.arrayToString(this.result);
     }
 }

@@ -1,90 +1,97 @@
 package Behaviours;
 
 import Agents.ManagerAgent;
-import Utils.Utils;
-import Utils.Config;
+import Utils.Helper;
+import Utils.AppConfig;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
 
-
-enum ManagerInitiatorState {
-    IDLE,
-    INITIALIZED
-}
-
 public class ManagerBehaviour extends CyclicBehaviour {
-    private ManagerAgent myAgent;
-    private ManagerInitiatorState state;
+    private final ManagerAgent myAgent;
+    private ArrayList<double[]> results;
+    private double[] aggregatedResults;
 
     public ManagerBehaviour (ManagerAgent agent) {
         super(agent);
         myAgent = agent;
-        state = ManagerInitiatorState.IDLE;
     }
 
     @Override
     public void action() {
-        ACLMessage msg = Utils.receiveMessage(myAgent);
+        // wait UserAgent message
+        ACLMessage msg = Helper.receiveMessage(myAgent);
         if (msg != null) {
             if (msg.getPerformative() == ACLMessage.REQUEST) {
                 String petition = msg.getContent();
-                Utils.log(myAgent, "Petition " + petition + " received from UserAgent.");
-                if (Utils.validPetition(myAgent, petition, this.state.ordinal())) {
-                    if (petition.startsWith("I_")) {
-                        initializeFuzzyAgents(petition);
-                        this.state = ManagerInitiatorState.INITIALIZED;
-                        Utils.sendReply(myAgent, msg, ACLMessage.CONFIRM, null);
+                Helper.log(myAgent, "Petition " + petition + " received from UserAgent.");
+                if (petition.startsWith("I_")) {
+                    initializeApplication(petition);
+                    Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Agents successfully initialized.");
+                } else {
+                    ArrayList<String> requestConfig = Helper.readFile("files/" + Helper.getFilenameFromPetition(petition));
+                    String applicationRequest = requestConfig.get(0);
+                    if (myAgent.existsApplication(applicationRequest)) {
+                        AppConfig application = myAgent.getApplication(applicationRequest);
+                        runFuzzyInference(application, requestConfig);
+                        waitForResults(application);
+                        if (!results.isEmpty()) {
+                            aggregateResults(application.getAggregation());
+                            Helper.writeFile("files/result.txt", aggregatedResults);
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "files/result.txt");
+                        }
                     } else {
-                        ArrayList<String> inputs = Utils.readFile("files/" + Utils.getFilenameFromPetition(petition));
-                        int agentsNumber = myAgent.getFuzzyAgents(inputs.get(0));
-                        runFuzzyInference(inputs, agentsNumber);
-                        waitForResults(inputs.get(0), agentsNumber, inputs.size()-1);
-                        double result = aggregateResults(inputs.get(0), agentsNumber, inputs.size()-1);
-                        Utils.writeFile("files/result.txt", String.valueOf(result));
-                        Utils.sendReply(myAgent, msg, ACLMessage.CONFIRM, "files/result.txt");
+                        Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");
                     }
-                }                
-            }
-        }
-    }
-
-    private void initializeFuzzyAgents(String petition) {
-        Config config = new Config("files/" + Utils.getFilenameFromPetition(petition));
-        myAgent.createFuzzyAgents(config);
-    }
-
-    private void runFuzzyInference(ArrayList<String> inputs, int agentsNumber) {
-        for (int j = 0; j < agentsNumber; j++) {
-            for (int i = 1; i < inputs.size(); i++)
-            Utils.sendMessage(myAgent, ACLMessage.REQUEST, "FuzzyAgent" + String.valueOf(j) + "@imas-platform", inputs.get(i));
-        }
-    }
-
-    private void waitForResults(String application, int agentsNumber, int inputsNumber) {
-        int i = agentsNumber * inputsNumber;
-        while (i > 0) {
-            ACLMessage response = Utils.receiveMessage(myAgent);
-            if (response.getPerformative() == ACLMessage.INFORM) {
-                myAgent.addResult(application, response.getSender().getName().split("@")[0], Double.valueOf(response.getContent()));
-                i--;
-            }
-        }
-    }
-
-    private double aggregateResults(String application, int agentsNumber, int inputsNumber) {
-        double total = 0.0;
-        if (myAgent.getAggregation(application).equals("average")) {
-            for (int i = 0; i < agentsNumber; i++) {
-                double agentTotalResult = 0.0;
-                for (double result : myAgent.getResults(application, "FuzzyAgent" + String.valueOf(i))) {
-                    agentTotalResult += result;
                 }
-                total += (agentTotalResult / inputsNumber);
             }
-            total = total / agentsNumber;
         }
-        return total;
+    }
+
+    private void waitForResults(AppConfig application) {
+        results = new ArrayList<>();
+        for (int i = 0; i < application.getNumberOfAgents(); i++) {
+            ACLMessage response = Helper.receiveMessage(myAgent);
+            if (response.getPerformative() == ACLMessage.INFORM) {
+                String[] result = response.getContent().split(" ");
+                double[] doubleResult = new double[result.length];
+                for (int j = 0; j < doubleResult.length; j++) {
+                    doubleResult[j] = Double.parseDouble(result[j]);
+                }
+                results.add(doubleResult);
+            }
+        }
+    }
+
+    private void initializeApplication(String petition) {
+        AppConfig appConfig = new AppConfig("files/" + Helper.getFilenameFromPetition(petition));
+        myAgent.createFuzzyAgents(appConfig);
+    }
+
+    private void runFuzzyInference(AppConfig application, ArrayList<String> requestConfig) {
+        StringBuilder query = new StringBuilder();
+        for (int i = 1; i < requestConfig.size(); i++) {
+            query.append(requestConfig.get(i)).append(" ");
+        }
+        System.out.println(query);
+        for (String fuzzyAgent : application.getFuzzyAgents()) {
+            Helper.sendMessage(myAgent, ACLMessage.REQUEST, fuzzyAgent + "@" + myAgent.getContainerController().getName(), query.toString());
+        }
+    }
+
+    private void aggregateResults(String aggregation) {
+        int numberOfQueries = results.get(0).length;
+        aggregatedResults = new double[numberOfQueries];
+        switch (aggregation) {
+            case "average":
+                for (int i = 0; i < numberOfQueries; i++) {
+                    for (double[] d : results) {
+                        aggregatedResults[i] += d[i];
+                    }
+                    aggregatedResults[i] /= results.size();
+                }
+                break;
+        }
     }
 }
