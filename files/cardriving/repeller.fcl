@@ -1,0 +1,100 @@
+FUNCTION_BLOCK sensible
+
+VAR_INPUT
+	frontSensor : REAL; (* RANGE(0.0 100.0) *)
+	rearSensor : REAL; (* RANGE(0.0 100.0) *)
+	rightSensor : REAL; (* RANGE(0.0 10.0) *)
+	leftSensor : REAL; (* RANGE(0.0 10.0) *)
+END_VAR
+
+VAR_OUTPUT
+	acceleration : REAL; (* RANGE(-1.0 1.0) *)
+	steer : REAL; (* RANGE(-1.0 1.0) *)
+END_VAR
+
+FUZZIFY frontSensor
+	TERM very_close := (0.0, 1.0) (10.0, 0.0);
+	TERM close := (0.0, 0.0) (25.0, 1.0) (50.0, 0.0);
+	TERM prudent := (25.0, 0.0) (50.0, 1.0) (75.0, 0.0);
+	TERM far := (50.0, 0.0) (75.0, 1.0) (100.0, 0.0);
+	TERM very_far := (75.0, 0.0) (100.0, 1.0);
+END_FUZZIFY
+
+FUZZIFY rearSensor
+	TERM very_close := (0.0, 1.0) (10.0, 0.0);
+	TERM close := (0.0, 0.0) (25.0, 1.0) (50.0, 0.0);
+	TERM prudent := (25.0, 0.0) (50.0, 1.0) (75.0, 0.0);
+	TERM far := (50.0, 0.0) (75.0, 1.0) (100.0, 0.0);
+	TERM very_far := (75.0, 0.0) (100.0, 1.0);
+END_FUZZIFY
+
+FUZZIFY rightSensor
+	TERM close := (0.0, 1.0) (5.0, 0.0);
+	TERM prudent := (0.0, 0.0) (5.0, 1.0) (10.0, 0.0);
+	TERM far := (5.0, 0.0) (10.0, 1.0);
+END_FUZZIFY
+
+FUZZIFY leftSensor
+	TERM close := (0.0, 1.0) (5.0, 0.0);
+	TERM prudent := (0.0, 0.0) (5.0, 1.0) (10.0, 0.0);
+	TERM far := (5.0, 0.0) (10.0, 1.0);
+END_FUZZIFY
+
+DEFUZZIFY acceleration
+	TERM hard_break := (-1.0, 1.0) (-0.5, 0.0);
+	TERM break := (-1.0, 0.0) (-0.5, 1.0) (0.0, 0.0);
+	TERM neutral := (-0.5, 0.0) (0.0, 1.0) (0.5, 0.0);
+	TERM accel := (0.0, 0.0) (0.5, 1.0) (1.0, 0.0);
+	TERM hard_accel := (0.5, 0.0) (1.0, 1.0);
+	METHOD: COG;
+	DEFAULT := 0.0;
+END_DEFUZZIFY
+
+DEFUZZIFY steer
+	TERM left := (-1.0, 1.0) (0.0, 0.0);
+	TERM neutral := (-1.0, 0.0) (0.0, 1.0) (1.0, 0.0);
+	TERM right := (0.0,0.0) (1.0, 1.0);
+	METHOD: COG;
+	DEFAULT := 0.0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	ACCU : MAX;
+	AND : MIN;
+
+	RULE 1: IF frontSensor IS very_close AND rearSensor IS very_far THEN acceleration IS hard_break;
+	RULE 2: IF frontSensor IS very_close AND rearSensor IS far THEN acceleration IS hard_break;
+	RULE 3: IF frontSensor IS very_close AND rearSensor IS prudent THEN acceleration IS hard_break;
+	RULE 4: IF frontSensor IS very_close AND rearSensor IS close THEN acceleration IS neutral;
+	RULE 5: IF frontSensor IS very_close AND rearSensor IS very_close THEN acceleration IS neutral;
+
+	RULE 7: IF frontSensor IS close AND rearSensor IS very_far THEN acceleration IS hard_break;
+	RULE 8: IF frontSensor IS close AND rearSensor IS far THEN acceleration IS hard_break;
+	RULE 9: IF frontSensor IS close AND rearSensor IS prudent THEN acceleration IS hard_break;
+	RULE 10: IF frontSensor IS close AND rearSensor IS close THEN acceleration IS neutral;
+	RULE 11: IF frontSensor IS close AND rearSensor IS very_close THEN acceleration IS hard_accel;
+
+	RULE 12: IF frontSensor IS prudent AND rearSensor IS very_far THEN acceleration IS neutral;
+	RULE 13: IF frontSensor IS prudent AND rearSensor IS far THEN acceleration IS neutral;
+	RULE 14: IF frontSensor IS prudent AND rearSensor IS prudent THEN acceleration IS neutral;
+	RULE 15: IF frontSensor IS prudent AND rearSensor IS close THEN acceleration IS hard_accel;
+	RULE 16: IF frontSensor IS prudent AND rearSensor IS very_close THEN acceleration IS hard_accel;
+
+	RULE 17: IF frontSensor IS far AND rearSensor IS very_far THEN acceleration IS hard_accel;
+	RULE 18: IF frontSensor IS far AND rearSensor IS far THEN acceleration IS hard_accel;
+	RULE 19: IF frontSensor IS far AND rearSensor IS prudent THEN acceleration IS hard_accel;
+	RULE 20: IF frontSensor IS far AND rearSensor IS close THEN acceleration IS hard_accel;
+	RULE 21: IF frontSensor IS far AND rearSensor IS very_close THEN acceleration IS hard_accel;
+
+	RULE 22: IF frontSensor IS very_far AND rearSensor IS very_far THEN acceleration IS hard_accel;
+	RULE 23: IF frontSensor IS very_far AND rearSensor IS far THEN acceleration IS hard_accel;
+	RULE 24: IF frontSensor IS very_far AND rearSensor IS prudent THEN acceleration IS hard_accel;
+	RULE 25: IF frontSensor IS very_far AND rearSensor IS close THEN acceleration IS hard_accel;
+	RULE 26: IF frontSensor IS very_far AND rearSensor IS very_close THEN acceleration IS hard_accel;
+
+	RULE 27: IF rightSensor IS close THEN steer IS left;
+	RULE 28: IF leftSensor IS close THEN steer IS right;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
