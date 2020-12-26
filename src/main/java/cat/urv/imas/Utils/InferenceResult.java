@@ -1,4 +1,4 @@
-package Utils;
+package cat.urv.imas.Utils;
 
 public class InferenceResult {
     private boolean successful = false;

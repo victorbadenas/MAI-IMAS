@@ -1,6 +1,6 @@
-package Agents;
+package cat.urv.imas.Agents;
 
-import Behaviours.WaitHumanPetitions;
+import cat.urv.imas.Behaviours.WaitHumanPetitions;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;

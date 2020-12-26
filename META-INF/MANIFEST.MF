@@ -1,0 +1,2 @@
+Class-Path: dependency/jade-4.5.0.jar dependency/jFuzzyLogic-1.2.1.jar dependency/jline-2.14.4.jar dependency/log4j-core-2.3.jar dependency/log4j-api-2.3.jar
+Main-Class: jade.Boot

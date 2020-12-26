@@ -1,4 +1,4 @@
-package Utils;
+package cat.urv.imas.Utils;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -11,13 +11,16 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import jade.util.Logger;
+//import jade.util.Logger;
+//import java.util.logging.LogManager;
+//import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 public class Helper {
 
-    private static final String logFormat = "[%s] %s";
-    private static Logger myLogger = Logger.getMyLogger("IMAS_group");
+    private static Logger myLogger = LogManager.getLogger();
 
     /**
      * Send message to Agent.
@@ -61,10 +64,10 @@ public class Helper {
     }
 
     public static boolean isValidPetition(Agent a, String petition) {
+        if (petition.length() < 3 || !(petition.startsWith("I_") || petition.startsWith("D_")))
+            return false;
         String filename = getFilenameFromPetition(petition);
-        File checkFile = new File("files/" + filename);
-
-        return (petition.startsWith("I_") || petition.startsWith("D_")) && checkFile.exists();
+        return new File("files/" + filename).exists();
     }
 
     public static String getFilenameFromPetition(String petition) {
@@ -100,14 +103,8 @@ public class Helper {
         }
     }
 
-    /**
-     * Prints a log
-     *
-     * @param a       Agent that prints the log
-     * @param message Message of the log
-     */
-    public static void log(Agent a, String message) {
-        myLogger.log(Logger.INFO, String.format(logFormat, a.getLocalName(), message));
+    public static void debug(String message) {
+        myLogger.debug(message);
     }
 
     /**
@@ -116,8 +113,8 @@ public class Helper {
      * @param a       Agent that prints the log
      * @param message Message of the log
      */
-    public static void warn(Agent a, String message) {
-        myLogger.log(Logger.WARNING, String.format(logFormat, a.getLocalName(), message));
+    public static void log(String message) {
+        myLogger.info(message);
     }
 
     /**
@@ -126,8 +123,18 @@ public class Helper {
      * @param a       Agent that prints the log
      * @param message Message of the log
      */
-    public static void error(Agent a, String message) {
-        myLogger.log(Logger.SEVERE, String.format(logFormat, a.getLocalName(), message));
+    public static void warn(String message) {
+        myLogger.warn(message);
+    }
+
+    /**
+     * Prints a log
+     *
+     * @param a       Agent that prints the log
+     * @param message Message of the log
+     */
+    public static void error(String message) {
+        myLogger.error(message);
     }
 
     public static String arrayToString(double[] doubleArray) {

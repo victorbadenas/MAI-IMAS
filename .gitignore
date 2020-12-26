@@ -23,6 +23,8 @@ hs_err_pid*
 
 APDescription.txt
 MTPs-Main-Container.txt
+*.iml
+target/
 
 .vscode
 
@@ -35,3 +37,4 @@ node_modules
 coverage
 npm-debug.log
 /test/output
+files/result.txt

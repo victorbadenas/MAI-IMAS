@@ -1,8 +1,8 @@
-package Behaviours;
+package cat.urv.imas.Behaviours;
 
-import Agents.ManagerAgent;
-import Utils.Helper;
-import Utils.AppConfig;
+import cat.urv.imas.Agents.ManagerAgent;
+import cat.urv.imas.Utils.Helper;
+import cat.urv.imas.Utils.AppConfig;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -25,7 +25,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
         if (msg != null) {
             if (msg.getPerformative() == ACLMessage.REQUEST) {
                 String petition = msg.getContent();
-                Helper.log(myAgent, "Petition " + petition + " received from UserAgent.");
+                Helper.log("Petition " + petition + " received from UserAgent.");
                 if (petition.startsWith("I_")) {
                     initializeApplication(petition);
                     Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Agents successfully initialized.");
@@ -39,7 +39,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
                         if (!results.isEmpty()) {
                             aggregateResults(application.getAggregation());
                             Helper.writeFile("files/result.txt", aggregatedResults);
-                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "files/result.txt");
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at 'files/result.txt'");
                         }
                     } else {
                         Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");
@@ -50,7 +50,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
     }
 
     private void waitForResults(AppConfig application) {
-        results = new ArrayList<>();
+        results = new ArrayList<double[]>();
         for (int i = 0; i < application.getNumberOfAgents(); i++) {
             ACLMessage response = Helper.receiveMessage(myAgent);
             if (response.getPerformative() == ACLMessage.INFORM) {
@@ -83,15 +83,13 @@ public class ManagerBehaviour extends CyclicBehaviour {
     private void aggregateResults(String aggregation) {
         int numberOfQueries = results.get(0).length;
         aggregatedResults = new double[numberOfQueries];
-        switch (aggregation) {
-            case "average":
-                for (int i = 0; i < numberOfQueries; i++) {
-                    for (double[] d : results) {
-                        aggregatedResults[i] += d[i];
-                    }
-                    aggregatedResults[i] /= results.size();
+        if (aggregation.equals("average")) {
+            for (int i = 0; i < numberOfQueries; i++) {
+                for (double[] d : results) {
+                    aggregatedResults[i] += d[i];
                 }
-                break;
+                aggregatedResults[i] /= results.size();
+            }
         }
     }
 }

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cat.urv.imas</groupId>
+    <artifactId>imas-platform</artifactId>
+    <version>1.0.0</version>
+
+    <repositories>
+        <!-- maven2 -->
+        <repository>
+            <id>maven2</id>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+
+        <!-- maven1 -->
+        <repository>
+            <id>maven1</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+
+        <!-- jade -->
+        <repository>
+            <id>tilab</id>
+            <url>https://jade.tilab.com/maven/</url>
+        </repository>
+    </repositories> 
+
+    <properties>
+        <!-- java version -->
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <!-- log level -->
+        <logback.loglevel>DEBUG</logback.loglevel>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${targetdirectory}</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+            </plugin>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.tilab.jade/jade -->
+        <dependency>
+            <groupId>com.tilab.jade</groupId>
+            <artifactId>jade</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.jFuzzyLogic/jFuzzyLogic -->
+        <dependency>
+            <groupId>net.sourceforge.jFuzzyLogic</groupId>
+            <artifactId>jFuzzyLogic</artifactId>
+            <version>1.2.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/jFuzzyLogic-1.2.1.jar</systemPath>
+        </dependency>
+
+        <!-- https://github.com/jline/jline2 -->
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+
+        <!-- https://github.com/apache/logging-log4j2 -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.3</version>
+        </dependency>
+    </dependencies>
+
+</project>

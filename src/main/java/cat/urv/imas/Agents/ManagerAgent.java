@@ -1,8 +1,8 @@
-package Agents;
+package cat.urv.imas.Agents;
 
-import Behaviours.ManagerBehaviour;
-import Utils.AppConfig;
-import Utils.Helper;
+import cat.urv.imas.Behaviours.ManagerBehaviour;
+import cat.urv.imas.Utils.AppConfig;
+import cat.urv.imas.Utils.Helper;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -19,7 +19,7 @@ public class ManagerAgent extends Agent {
     HashMap<String, AppConfig> applications;
 
     protected void setup() {
-        this.applications = new HashMap<>();
+        this.applications = new HashMap<String, AppConfig>();
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("ManagerAgent");
@@ -59,7 +59,7 @@ public class ManagerAgent extends Agent {
             UUID uuid = UUID.randomUUID();
             fuzzyAgents[i] = "FuzzyAgent_" + i + "_" + appConfig.getApplication() + "_" + uuid;
             try {
-                agentControllers[i] = cc.createNewAgent(fuzzyAgents[i], "Agents.FuzzyAgent", args);
+                agentControllers[i] = cc.createNewAgent(fuzzyAgents[i], "cat.urv.imas.Agents.FuzzyAgent", args);
                 try {
                     agentControllers[i].start();
                 } catch (StaleProxyException e) {
@@ -82,7 +82,7 @@ public class ManagerAgent extends Agent {
                     try {
                         ac.kill();
                     } catch (StaleProxyException e) {
-                        Helper.error(this, "Error while killing agent.");
+                        Helper.error("Error while killing agent.");
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package Utils;
+package cat.urv.imas.Utils;
 
 import jade.wrapper.AgentController;
 import org.w3c.dom.Document;

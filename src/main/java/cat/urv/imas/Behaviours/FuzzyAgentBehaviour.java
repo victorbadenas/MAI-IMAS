@@ -1,7 +1,7 @@
-package Behaviours;
-import Agents.FuzzyAgent;
-import Utils.InferenceResult;
-import Utils.Helper;
+package cat.urv.imas.Behaviours;
+import cat.urv.imas.Agents.FuzzyAgent;
+import cat.urv.imas.Utils.InferenceResult;
+import cat.urv.imas.Utils.Helper;
 
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -56,8 +56,8 @@ public class FuzzyAgentBehaviour extends CyclicBehaviour {
                             }
                         }
                     } catch (Exception e) {
-                        Helper.error(this.myAgent, String.format("Error in message %s", msg));
-                        Helper.error(this.myAgent, e.getMessage());
+                        Helper.error(String.format("Error in message %s", msg));
+                        Helper.error(e.getMessage());
                     }
                 }
                 break;
