@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 public class Helper {
 
     private static Logger myLogger = LogManager.getLogger();
+    private static final String FILES_DIR = "files";
 
     /**
      * Send message to Agent.
@@ -63,7 +64,11 @@ public class Helper {
     public static boolean isValidPetition(Agent a, String petition) {
         if (petition.length() < 3 || !(petition.startsWith("I_") || petition.startsWith("D_")))
             return false;
-        return new File("files/" + petition.substring(2)).exists();
+        return new File(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition)).exists();
+    }
+
+    public static String getFilenameFromPetition(String petition) {
+        return petition.substring(2);
     }
 
     public static ArrayList<String> readFile(String fileName) {
@@ -79,7 +84,7 @@ public class Helper {
             br.close();
             return inputs;
         } catch (Exception e) {
-            this.error("Could not read file with name: '" + fileName + "'");
+            Helper.error("Could not read file with name: '" + fileName + "'");
             return new ArrayList<String>();
         }
     }
@@ -95,7 +100,7 @@ public class Helper {
             }
             writer.close();
         } catch (Exception e) {
-            this.error("Could not write results file.");
+            Helper.error("Could not write results file.");
         }
     }
 

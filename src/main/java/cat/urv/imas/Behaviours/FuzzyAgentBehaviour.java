@@ -21,7 +21,6 @@ public class FuzzyAgentBehaviour extends CyclicBehaviour {
     private ReceiverState state;
     private ACLMessage requestMsg;
     private StringBuilder result;
-//    private String result;
 
     public FuzzyAgentBehaviour(FuzzyAgent a) {
         super(a);

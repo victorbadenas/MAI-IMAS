@@ -76,24 +76,20 @@ public class ManagerAgent extends Agent {
     }
 
     private void killOldApp(String application) {
-        for (HashMap.Entry<String, AppConfig> app : applications.entrySet()) {
-            if (application.equals(app.getKey())) {
-                for (AgentController ac : app.getValue().getControllers()) {
-                    try {
-                        ac.kill();
-                    } catch (StaleProxyException e) {
-                        Helper.error("Error while killing agent.");
-                    }
+        AppConfig app = this.getApplication(application);
+        if (app != null) {
+            for (AgentController ac : app.getValue().getControllers()) {
+                try {
+                    ac.kill();
+                } catch (StaleProxyException e) {
+                    Helper.error("Error while killing agent '" + ac.getName() + "'.");
                 }
             }
         }
     }
 
     public boolean existsApplication(String application) {
-        for (HashMap.Entry<String, AppConfig> app : applications.entrySet()) {
-            if (application.equals(app.getKey())) return true;
-        }
-        return false;
+        return this.getApplication(application) != null;
     }
 
     public AppConfig getApplication(String application) {

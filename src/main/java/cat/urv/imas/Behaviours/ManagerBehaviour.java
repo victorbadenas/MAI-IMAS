@@ -12,6 +12,10 @@ public class ManagerBehaviour extends CyclicBehaviour {
     private final ManagerAgent myAgent;
     private ArrayList<double[]> aggregatedResults;
 
+    private static final String RESULT_FILE = "result.txt";
+    private static final String FILES_DIR = "files";
+    private static final String RESULT_FILE = "result.txt";
+
     public ManagerBehaviour (ManagerAgent agent) {
         super(agent);
         myAgent = agent;
@@ -19,7 +23,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
-        // wait UserAgent message
         ACLMessage msg = Helper.receiveMessage(myAgent);
         if (msg != null) {
             if (msg.getPerformative() == ACLMessage.REQUEST) {
@@ -29,7 +32,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     initializeApplication(petition);
                     Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Agents successfully initialized.");
                 } else {
-                    ArrayList<String> requestConfig = Helper.readFile("files/" + Helper.getFilenameFromPetition(petition));
+                    ArrayList<String> requestConfig = Helper.readFile(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition));
                     String applicationRequest = requestConfig.get(0);
                     if (myAgent.existsApplication(applicationRequest)) {
                         AppConfig application = myAgent.getApplication(applicationRequest);
@@ -37,8 +40,8 @@ public class ManagerBehaviour extends CyclicBehaviour {
                         HashMap<String, ArrayList<double[]>> results = waitForResults(application);
                         if (!results.isEmpty()) {
                             aggregateResults(results, application.getAggregation());
-                            Helper.writeFile("files/result.txt", aggregatedResults);
-                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at 'files/result.txt'");
+                            Helper.writeFile(FILES_DIR + "/" + RESULT_FILE, aggregatedResults);
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at '" + FILES_DIR + "/" + RESULT_FILE + "'");
                         }
                     } else {
                         Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");
@@ -48,14 +51,19 @@ public class ManagerBehaviour extends CyclicBehaviour {
         }
     }
 
+    private void initializeApplication(String petition) {
+        AppConfig appConfig = new AppConfig(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition));
+        myAgent.createFuzzyAgents(appConfig);
+    }
+
     private HashMap<String, ArrayList<double[]>> waitForResults(AppConfig application) {
-        HashMap<String, ArrayList<double[]>> results = new HashMap<>();
+        HashMap<String, ArrayList<double[]>> results = new HashMap<String, ArrayList<double[]>>();
         for (int i = 0; i < application.getNumberOfAgents(); i++) {
             ACLMessage response = Helper.receiveMessage(myAgent);
             if (response.getPerformative() == ACLMessage.INFORM) {
                 String sender = response.getSender().getName();
                 String[] result = response.getContent().split(" ");
-                ArrayList<double[]> fuzzyAgentResponse = new ArrayList<>();
+                ArrayList<double[]> fuzzyAgentResponse = new ArrayList<double[]>();
                 for (int k = 0; k<result.length; k++){
                     String[] valuesAsString = result[k].split(",");
                     for (int j = 0; j<valuesAsString.length; j++){
@@ -69,17 +77,11 @@ public class ManagerBehaviour extends CyclicBehaviour {
         return results;
     }
 
-    private void initializeApplication(String petition) {
-        AppConfig appConfig = new AppConfig("files/" + Helper.getFilenameFromPetition(petition));
-        myAgent.createFuzzyAgents(appConfig);
-    }
-
     private void runFuzzyInference(AppConfig application, ArrayList<String> requestConfig) {
         StringBuilder query = new StringBuilder();
         for (int i = 1; i < requestConfig.size(); i++) {
             query.append(requestConfig.get(i)).append(" ");
         }
-        System.out.println(query);
         for (String fuzzyAgent : application.getFuzzyAgents()) {
             Helper.sendMessage(myAgent, ACLMessage.REQUEST, fuzzyAgent + "@" + myAgent.getContainerController().getName(), query.toString());
         }
@@ -87,7 +89,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
 
     private void aggregateResults(HashMap<String, ArrayList<double[]>> results, String aggregation) {
         int numFuzzyAgents = results.size();
-        aggregatedResults = new ArrayList<>();
+        aggregatedResults = new ArrayList<double[]>();
         if (aggregation.equals("average")) {
             for (ArrayList<double[]> fuzzyAgentInferences : results.values()){
                 for (int i = 0; i<fuzzyAgentInferences.size(); i++){
@@ -102,8 +104,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     aggregatedResults.get(i)[j] /= numFuzzyAgents;
                 }
             }
-            aggregatedResults[i] /= results.size();
-        }
         }
     }
 }
