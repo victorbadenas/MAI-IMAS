@@ -1,9 +1,0 @@
-****************************************
-******      Title: IMAS_basic_simulation
-******      Application: tipper
-******      # of Fuzzy Agents: 3
-******      Aggregation: average
-****************************************
-
-Elapsed Time:      0 s
-
