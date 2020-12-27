@@ -11,9 +11,6 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-//import jade.util.Logger;
-//import java.util.logging.LogManager;
-//import java.util.logging.Logger;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -21,6 +18,8 @@ import org.apache.logging.log4j.LogManager;
 public class Helper {
 
     private static Logger myLogger = LogManager.getLogger();
+    private static final String FILES_DIR = "files";
+    private static final String RESULT_DIR = "results";
 
     /**
      * Send message to Agent.
@@ -66,8 +65,7 @@ public class Helper {
     public static boolean isValidPetition(Agent a, String petition) {
         if (petition.length() < 3 || !(petition.startsWith("I_") || petition.startsWith("D_")))
             return false;
-        String filename = getFilenameFromPetition(petition);
-        return new File("files/" + filename).exists();
+        return new File(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition)).exists();
     }
 
     public static String getFilenameFromPetition(String petition) {
@@ -87,13 +85,14 @@ public class Helper {
             br.close();
             return inputs;
         } catch (Exception e) {
+            Helper.error("Could not read file with name: '" + fileName + "'");
             return new ArrayList<String>();
         }
     }
 
     public static void writeFile(String fileName, AppConfig application, ArrayList<String> requestConfig, ArrayList<double[]> content, long timeElapsed) {
-        new File("./results").mkdir();
         try {
+            Helper.createDir();
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
             writer.println(application.toString());
             writer.println("Elapsed Time:      " + timeElapsed + " ms\n");
@@ -111,8 +110,12 @@ public class Helper {
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Could not write results file: " + e.toString());
+            Helper.error("Could not write results file: " + e.toString());
         }
+    }
+
+    private static void createDir() {
+        new File(RESULT_DIR).mkdir();
     }
 
     public static void debug(String message) {

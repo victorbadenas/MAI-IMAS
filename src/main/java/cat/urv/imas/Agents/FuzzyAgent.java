@@ -19,11 +19,13 @@ public class FuzzyAgent extends Agent {
     private String[] inputVariableNames;
     private String[] outputVariableNames;
 
+    private static final String FILES_DIR = "files";
+
     protected void setup() throws ExceptionInInitializerError{
         Object[] args = getArguments();
         String fcl = args[0].toString();
-        this.fisFileName = "files/" + fcl + ".fcl";
-        Helper.log("Initializing User Agent with name: " + getAID().getLocalName());
+        this.fisFileName = FILES_DIR + "/" + fcl + ".fcl";
+        Helper.log("Initializing FuzzyAgent with name: " + getAID().getLocalName());
         this.loadFis();
         this.register();
         this.addBehaviour(new FuzzyAgentBehaviour(this));

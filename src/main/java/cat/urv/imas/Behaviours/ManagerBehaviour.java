@@ -13,6 +13,10 @@ public class ManagerBehaviour extends CyclicBehaviour {
     private final ManagerAgent myAgent;
     private ArrayList<double[]> aggregatedResults;
 
+    private static final String RESULT_FILE = "results_";
+    private static final String RESULT_DIR = "results";
+    private static final String FILES_DIR = "files";
+
     public ManagerBehaviour (ManagerAgent agent) {
         super(agent);
         myAgent = agent;
@@ -20,7 +24,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
-        // wait UserAgent message
         ACLMessage msg = Helper.receiveMessage(myAgent);
         if (msg != null) {
             if (msg.getPerformative() == ACLMessage.REQUEST) {
@@ -30,7 +33,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     initializeApplication(petition);
                     Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Agents successfully initialized.");
                 } else {
-                    ArrayList<String> requestConfig = Helper.readFile("files/" + Helper.getFilenameFromPetition(petition));
+                    ArrayList<String> requestConfig = Helper.readFile(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition));
                     String applicationRequest = requestConfig.get(0);
                     if (myAgent.existsApplication(applicationRequest)) {
                         AppConfig application = myAgent.getApplication(applicationRequest);
@@ -42,9 +45,9 @@ public class ManagerBehaviour extends CyclicBehaviour {
                         if (!results.isEmpty()) {
                             aggregateResults(results, application.getAggregation());
                             String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-                            String resultsFile = "./results/results_" + dateTime + ".txt";
+                            String resultsFile = RESULT_DIR + "/" + RESULT_FILE + dateTime + ".txt";
                             Helper.writeFile(resultsFile, application, requestConfig, aggregatedResults, timeElapsed);
-                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "The results are in " + resultsFile);
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at '" + resultsFile + "'");
                         }
                     } else {
                         Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");
@@ -52,6 +55,11 @@ public class ManagerBehaviour extends CyclicBehaviour {
                 }
             }
         }
+    }
+
+    private void initializeApplication(String petition) {
+        AppConfig appConfig = new AppConfig(FILES_DIR + "/" + Helper.getFilenameFromPetition(petition));
+        myAgent.createFuzzyAgents(appConfig);
     }
 
     private HashMap<String, ArrayList<double[]>> waitForResults(AppConfig application) {
@@ -73,11 +81,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
             }
         }
         return results;
-    }
-
-    private void initializeApplication(String petition) {
-        AppConfig appConfig = new AppConfig("files/" + Helper.getFilenameFromPetition(petition));
-        myAgent.createFuzzyAgents(appConfig);
     }
 
     private void runFuzzyInference(AppConfig application, ArrayList<String> requestConfig) {
