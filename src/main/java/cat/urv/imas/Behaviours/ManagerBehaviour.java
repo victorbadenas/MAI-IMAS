@@ -49,13 +49,13 @@ public class ManagerBehaviour extends CyclicBehaviour {
     }
 
     private HashMap<String, ArrayList<double[]>> waitForResults(AppConfig application) {
-        HashMap<String, ArrayList<double[]>> results = new HashMap<>();
+        HashMap<String, ArrayList<double[]>> results = new HashMap<String, ArrayList<double[]>>();
         for (int i = 0; i < application.getNumberOfAgents(); i++) {
             ACLMessage response = Helper.receiveMessage(myAgent);
             if (response.getPerformative() == ACLMessage.INFORM) {
                 String sender = response.getSender().getName();
                 String[] result = response.getContent().split(" ");
-                ArrayList<double[]> fuzzyAgentResponse = new ArrayList<>();
+                ArrayList<double[]> fuzzyAgentResponse = new ArrayList<double[]>();
                 for (int k = 0; k<result.length; k++){
                     String[] valuesAsString = result[k].split(",");
                     for (int j = 0; j<valuesAsString.length; j++){
@@ -87,7 +87,7 @@ public class ManagerBehaviour extends CyclicBehaviour {
 
     private void aggregateResults(HashMap<String, ArrayList<double[]>> results, String aggregation) {
         int numFuzzyAgents = results.size();
-        aggregatedResults = new ArrayList<>();
+        aggregatedResults = new ArrayList<double[]>();
         if (aggregation.equals("average")) {
             for (ArrayList<double[]> fuzzyAgentInferences : results.values()){
                 for (int i = 0; i<fuzzyAgentInferences.size(); i++){
@@ -102,8 +102,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     aggregatedResults.get(i)[j] /= numFuzzyAgents;
                 }
             }
-            aggregatedResults[i] /= results.size();
-        }
         }
     }
 }

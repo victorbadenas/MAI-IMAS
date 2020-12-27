@@ -34,7 +34,7 @@ public class WaitHumanPetitions extends CyclicBehaviour {
         while (!validPetition) {
             Helper.log("Waiting for a human petition...");
             try {
-                reader.addCompleter(new StringsCompleter("I_configuration1.txt", "I_configuration2.txt", "I_car_configuration.txt"));
+                reader.addCompleter(new StringsCompleter("I_configuration1.txt", "I_configuration2.txt", "I_car_configuration_10.txt", "I_car_configuration_15.txt", "I_car_configuration_5.txt"));
                 reader.addCompleter(new StringsCompleter("D_requests_quality.txt", "D_requests_tipper.txt", "D_car_requests.txt"));
                 petition = reader.readLine().trim();
             } catch (Exception e) {
