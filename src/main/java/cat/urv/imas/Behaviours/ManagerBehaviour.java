@@ -33,12 +33,16 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     String applicationRequest = requestConfig.get(0);
                     if (myAgent.existsApplication(applicationRequest)) {
                         AppConfig application = myAgent.getApplication(applicationRequest);
+                        long startTime = System.currentTimeMillis();
                         runFuzzyInference(application, requestConfig);
                         HashMap<String, ArrayList<double[]>> results = waitForResults(application);
+                        long endTime = System.currentTimeMillis();
+                        long timeElapsed = endTime - startTime;
                         if (!results.isEmpty()) {
-                            aggregateResults(results, application.getAggregation());
-                            Helper.writeFile("files/result.txt", aggregatedResults);
-                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at 'files/result.txt'");
+                            String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+                            String resultsFile = "results/results_" + dateTime + ".txt";
+                            Helper.writeFile(resultsFile, application, requestConfig, aggregatedResults, timeElapsed);
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "The results are in " + resultsFile);
                         }
                     } else {
                         Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");

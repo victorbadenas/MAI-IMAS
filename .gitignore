@@ -37,4 +37,4 @@ node_modules
 coverage
 npm-debug.log
 /test/output
-files/result.txt
+results/*

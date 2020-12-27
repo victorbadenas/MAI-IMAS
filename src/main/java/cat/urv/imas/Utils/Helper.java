@@ -91,20 +91,23 @@ public class Helper {
         }
     }
 
-    public static void writeFile(String fileName, ArrayList<double[]> content) {
+    public static void writeFile(String fileName, AppConfig application, ArrayList<String> requestConfig, ArrayList<double[]> content, long timeElapsed) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+            writer.println(application.toString());
+            writer.println("Elapsed Time:      " + timeElapsed + " ms\n");
             for (int i=0; i<content.get(0).length; i++){
+                StringBuilder sb = new StringBuilder("**********   SUBREQUEST #").append(i + 1).append("    **********\n");
+                sb.append("Input:   ").append(requestConfig.get(i + 1)).append("\n");
+                sb.append("Output:  ");
                 for (int j=0; j<content.size(); j++) {
-                    if (j < content.size() - 1) writer.print(content.get(j)[i] + ",");
-                    else writer.println(content.get(j)[i]);
+                    if (j < content.size() - 1) sb.append(content.get(j)[i]).append(",");
+                    else sb.append(content.get(j)[i]);
                 }
+                sb.append("\n****************************************\n");
+                writer.println(sb.toString());
             }
             writer.close();
-/*            for(Double d : content) {
-                writer.println(d);
-            }
-            writer.close()*/;
         } catch (Exception e) {
             System.out.println("Could not write results file.");
         }
