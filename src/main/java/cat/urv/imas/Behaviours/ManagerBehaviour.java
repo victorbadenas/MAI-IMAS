@@ -5,6 +5,7 @@ import cat.urv.imas.Utils.Helper;
 import cat.urv.imas.Utils.AppConfig;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import java.text.SimpleDateFormat;
 
 import java.util.*;
 
@@ -12,9 +13,9 @@ public class ManagerBehaviour extends CyclicBehaviour {
     private final ManagerAgent myAgent;
     private ArrayList<double[]> aggregatedResults;
 
-    private static final String RESULT_FILE = "result.txt";
+    private static final String RESULT_FILE = "results_";
+    private static final String RESULT_DIR = "results";
     private static final String FILES_DIR = "files";
-    private static final String RESULT_FILE = "result.txt";
 
     public ManagerBehaviour (ManagerAgent agent) {
         super(agent);
@@ -36,12 +37,17 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     String applicationRequest = requestConfig.get(0);
                     if (myAgent.existsApplication(applicationRequest)) {
                         AppConfig application = myAgent.getApplication(applicationRequest);
+                        long startTime = System.currentTimeMillis();
                         runFuzzyInference(application, requestConfig);
                         HashMap<String, ArrayList<double[]>> results = waitForResults(application);
+                        long endTime = System.currentTimeMillis();
+                        long timeElapsed = endTime - startTime;
                         if (!results.isEmpty()) {
                             aggregateResults(results, application.getAggregation());
-                            Helper.writeFile(FILES_DIR + "/" + RESULT_FILE, aggregatedResults);
-                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at '" + FILES_DIR + "/" + RESULT_FILE + "'");
+                            String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+                            String resultsFile = RESULT_DIR + "/" + RESULT_FILE + dateTime + ".txt";
+                            Helper.writeFile(resultsFile, application, requestConfig, aggregatedResults, timeElapsed);
+                            Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at '" + resultsFile + "'");
                         }
                     } else {
                         Helper.sendReply(myAgent, msg, ACLMessage.FAILURE, "The application requested is not initialized.");

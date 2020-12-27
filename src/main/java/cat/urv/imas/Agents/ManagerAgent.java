@@ -78,11 +78,11 @@ public class ManagerAgent extends Agent {
     private void killOldApp(String application) {
         AppConfig app = this.getApplication(application);
         if (app != null) {
-            for (AgentController ac : app.getValue().getControllers()) {
+            for (AgentController ac : app.getControllers()) {
                 try {
                     ac.kill();
                 } catch (StaleProxyException e) {
-                    Helper.error("Error while killing agent '" + ac.getName() + "'.");
+                    Helper.error("Error while killing agent.");
                 }
             }
         }

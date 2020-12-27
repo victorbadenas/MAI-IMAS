@@ -78,4 +78,13 @@ public class AppConfig implements Serializable {
     public AgentController[] getControllers() {
         return controllers;
     }
+
+    public String toString() {
+        return "****************************************\n" +
+                "******      Title: " + this.title + "\n" +
+                "******      Application: " + this.application + "\n" +
+                "******      # of Fuzzy Agents: " + this.numberOfAgents + "\n" +
+                "******      Aggregation: " + this.aggregation + "\n" +
+                "****************************************\n";
+    }
 }

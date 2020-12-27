@@ -3,6 +3,6 @@
    <title>IMAS_car_simulation_15</title>
    <application>driving</application>  
    <fuzzyagents>15</fuzzyagents >
-   <fuzzySettings>car_careless,car_careless2,car_kamikaze,car_repeller,car_sensible,car_sensible2</fuzzySettings>
+   <fuzzySettings>car_careless,car_careless2,car_kamikaze,car_repeller,car_sensible,car_sensible2,car_careless,car_careless2,car_kamikaze,car_repeller,car_sensible,car_sensible2,car_careless,car_careless2,car_sensible</fuzzySettings>
    <aggregation>average</aggregation>
 </SimulationSettings>
