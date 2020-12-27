@@ -92,6 +92,7 @@ public class Helper {
     }
 
     public static void writeFile(String fileName, AppConfig application, ArrayList<String> requestConfig, ArrayList<double[]> content, long timeElapsed) {
+        new File("./results").mkdir();
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
             writer.println(application.toString());
@@ -109,7 +110,8 @@ public class Helper {
             }
             writer.close();
         } catch (Exception e) {
-            System.out.println("Could not write results file.");
+            e.printStackTrace();
+            System.out.println("Could not write results file: " + e.toString());
         }
     }
 

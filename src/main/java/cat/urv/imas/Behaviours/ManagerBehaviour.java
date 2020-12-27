@@ -5,6 +5,7 @@ import cat.urv.imas.Utils.Helper;
 import cat.urv.imas.Utils.AppConfig;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import java.text.SimpleDateFormat;
 
 import java.util.*;
 
@@ -39,8 +40,9 @@ public class ManagerBehaviour extends CyclicBehaviour {
                         long endTime = System.currentTimeMillis();
                         long timeElapsed = endTime - startTime;
                         if (!results.isEmpty()) {
+                            aggregateResults(results, application.getAggregation());
                             String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-                            String resultsFile = "results/results_" + dateTime + ".txt";
+                            String resultsFile = "./results/results_" + dateTime + ".txt";
                             Helper.writeFile(resultsFile, application, requestConfig, aggregatedResults, timeElapsed);
                             Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "The results are in " + resultsFile);
                         }
@@ -83,7 +85,6 @@ public class ManagerBehaviour extends CyclicBehaviour {
         for (int i = 1; i < requestConfig.size(); i++) {
             query.append(requestConfig.get(i)).append(" ");
         }
-        System.out.println(query);
         for (String fuzzyAgent : application.getFuzzyAgents()) {
             Helper.sendMessage(myAgent, ACLMessage.REQUEST, fuzzyAgent + "@" + myAgent.getContainerController().getName(), query.toString());
         }
