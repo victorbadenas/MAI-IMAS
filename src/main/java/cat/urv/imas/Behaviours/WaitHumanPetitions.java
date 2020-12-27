@@ -13,6 +13,15 @@ public class WaitHumanPetitions extends CyclicBehaviour {
     private final UserAgent myAgent;
     private ConsoleReader reader;
 
+    private static final String HELP_MSG = "Usage: [I_|D_]<filename>\n" +
+                                          "\t I\t\tInitialize the system using a configuration file. E.g. I_configuration1.txt\n" +
+                                          "\t D\t\tRun inference in an initialized system using an input file. E.g. D_requests_tipper.txt\n" +
+                                          "\t help\t\tShows this help output\n" +
+                                          "You can find several configuration and input files in the 'files' directory.\n\n" + 
+                                          "Autocomplete mode ON: You can use <tab> in order to show different autocomplete options.\n";
+    private static final String EXIT_MSG = "In order to exit the system, please run: <Ctrl> + <C> + <Enter>\n";
+    private static final String INVALID_MSG = "Invalid petition -- \nTry 'help' for further information.\n";
+
     public WaitHumanPetitions(UserAgent a) {
         super(a);
         myAgent = a;
@@ -42,9 +51,7 @@ public class WaitHumanPetitions extends CyclicBehaviour {
                 petition = sc.next().trim();
             }
             validPetition = Helper.isValidPetition(myAgent, petition);
-            if (!validPetition) {
-                Helper.error("Invalid petition! Try again.");
-            }
+            this.cliOptions(validPetition, petition);
         }
 
         Helper.sendMessage(myAgent, ACLMessage.REQUEST, "ManagerAgent@" + myAgent.getContainerController().getName(), petition);
@@ -53,6 +60,14 @@ public class WaitHumanPetitions extends CyclicBehaviour {
             Helper.log(response.getContent());
         } else {
             Helper.error(response.getContent());
+        }
+    }
+
+    private void cliOptions(boolean validPetition, String petition) {
+        if (!validPetition) {
+            if ("help".equals(petition.toLowerCase())) Helper.error(HELP_MSG);
+            else if ("exit".equals(petition.toLowerCase()) || "quit".equals(petition.toLowerCase())) Helper.error(EXIT_MSG);
+            else Helper.error(INVALID_MSG);
         }
     }
 }

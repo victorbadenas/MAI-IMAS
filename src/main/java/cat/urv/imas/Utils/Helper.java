@@ -11,9 +11,6 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-//import jade.util.Logger;
-//import java.util.logging.LogManager;
-//import java.util.logging.Logger;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -66,12 +63,7 @@ public class Helper {
     public static boolean isValidPetition(Agent a, String petition) {
         if (petition.length() < 3 || !(petition.startsWith("I_") || petition.startsWith("D_")))
             return false;
-        String filename = getFilenameFromPetition(petition);
-        return new File("files/" + filename).exists();
-    }
-
-    public static String getFilenameFromPetition(String petition) {
-        return petition.substring(2);
+        return new File("files/" + petition.substring(2)).exists();
     }
 
     public static ArrayList<String> readFile(String fileName) {
@@ -87,6 +79,7 @@ public class Helper {
             br.close();
             return inputs;
         } catch (Exception e) {
+            this.error("Could not read file with name: '" + fileName + "'");
             return new ArrayList<String>();
         }
     }
@@ -101,12 +94,8 @@ public class Helper {
                 }
             }
             writer.close();
-/*            for(Double d : content) {
-                writer.println(d);
-            }
-            writer.close()*/;
         } catch (Exception e) {
-            System.out.println("Could not write results file.");
+            this.error("Could not write results file.");
         }
     }
 
