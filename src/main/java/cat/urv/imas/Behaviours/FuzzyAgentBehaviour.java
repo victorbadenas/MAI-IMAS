@@ -21,6 +21,7 @@ public class FuzzyAgentBehaviour extends CyclicBehaviour {
     private ReceiverState state;
     private ACLMessage requestMsg;
     private StringBuilder result;
+//    private String result;
 
     public FuzzyAgentBehaviour(FuzzyAgent a) {
         super(a);
@@ -46,9 +47,7 @@ public class FuzzyAgentBehaviour extends CyclicBehaviour {
                                 InferenceResult res = this.myAgent.inferFCL(inferenceArguments);
                                 if (res.isSuccessful()) {
                                     this.state = ReceiverState.SUCCESS;
-                                    // force only to return one value even if the fuzzy system is returning more than one
-                                    // TODO: replace this with this.result = res.getValueString(); that will return the csv
-                                    this.result.append(res.getResult()[0]).append(" ");
+                                    this.result.append(res.getResultString()).append(" ");
                                 } else {
                                     this.state = ReceiverState.FAILED;
                                     break;

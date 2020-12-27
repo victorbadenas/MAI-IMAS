@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimulationSettings>
+   <title>IMAS_car_simulation_5</title>
+   <application>driving</application>  
+   <fuzzyagents>5</fuzzyagents >
+   <fuzzySettings>car_careless,car_kamikaze,car_repeller,car_sensible,car_sensible2</fuzzySettings>
+   <aggregation>average</aggregation>
+</SimulationSettings>

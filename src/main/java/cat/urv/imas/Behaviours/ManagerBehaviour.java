@@ -6,12 +6,11 @@ import cat.urv.imas.Utils.AppConfig;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class ManagerBehaviour extends CyclicBehaviour {
     private final ManagerAgent myAgent;
-    private ArrayList<double[]> results;
-    private double[] aggregatedResults;
+    private ArrayList<double[]> aggregatedResults;
 
     public ManagerBehaviour (ManagerAgent agent) {
         super(agent);
@@ -35,9 +34,9 @@ public class ManagerBehaviour extends CyclicBehaviour {
                     if (myAgent.existsApplication(applicationRequest)) {
                         AppConfig application = myAgent.getApplication(applicationRequest);
                         runFuzzyInference(application, requestConfig);
-                        waitForResults(application);
+                        HashMap<String, ArrayList<double[]>> results = waitForResults(application);
                         if (!results.isEmpty()) {
-                            aggregateResults(application.getAggregation());
+                            aggregateResults(results, application.getAggregation());
                             Helper.writeFile("files/result.txt", aggregatedResults);
                             Helper.sendReply(myAgent, msg, ACLMessage.CONFIRM, "Inference results stored at 'files/result.txt'");
                         }
@@ -49,19 +48,25 @@ public class ManagerBehaviour extends CyclicBehaviour {
         }
     }
 
-    private void waitForResults(AppConfig application) {
-        results = new ArrayList<double[]>();
+    private HashMap<String, ArrayList<double[]>> waitForResults(AppConfig application) {
+        HashMap<String, ArrayList<double[]>> results = new HashMap<>();
         for (int i = 0; i < application.getNumberOfAgents(); i++) {
             ACLMessage response = Helper.receiveMessage(myAgent);
             if (response.getPerformative() == ACLMessage.INFORM) {
+                String sender = response.getSender().getName();
                 String[] result = response.getContent().split(" ");
-                double[] doubleResult = new double[result.length];
-                for (int j = 0; j < doubleResult.length; j++) {
-                    doubleResult[j] = Double.parseDouble(result[j]);
+                ArrayList<double[]> fuzzyAgentResponse = new ArrayList<>();
+                for (int k = 0; k<result.length; k++){
+                    String[] valuesAsString = result[k].split(",");
+                    for (int j = 0; j<valuesAsString.length; j++){
+                        if (k == 0) fuzzyAgentResponse.add(new double[result.length]);
+                        fuzzyAgentResponse.get(j)[k] = Double.parseDouble(valuesAsString[j]);
+                    }
                 }
-                results.add(doubleResult);
+                results.put(sender, fuzzyAgentResponse);
             }
         }
+        return results;
     }
 
     private void initializeApplication(String petition) {
@@ -80,16 +85,25 @@ public class ManagerBehaviour extends CyclicBehaviour {
         }
     }
 
-    private void aggregateResults(String aggregation) {
-        int numberOfQueries = results.get(0).length;
-        aggregatedResults = new double[numberOfQueries];
+    private void aggregateResults(HashMap<String, ArrayList<double[]>> results, String aggregation) {
+        int numFuzzyAgents = results.size();
+        aggregatedResults = new ArrayList<>();
         if (aggregation.equals("average")) {
-            for (int i = 0; i < numberOfQueries; i++) {
-                for (double[] d : results) {
-                    aggregatedResults[i] += d[i];
+            for (ArrayList<double[]> fuzzyAgentInferences : results.values()){
+                for (int i = 0; i<fuzzyAgentInferences.size(); i++){
+                    if (aggregatedResults.size() < i + 1) aggregatedResults.add(new double[fuzzyAgentInferences.get(i).length]);
+                    for (int j = 0; j<fuzzyAgentInferences.get(i).length; j++){
+                        aggregatedResults.get(i)[j] += fuzzyAgentInferences.get(i)[j];
+                    }
                 }
-                aggregatedResults[i] /= results.size();
             }
+            for (int i = 0; i < aggregatedResults.size(); i++) {
+                for (int j = 0; j < aggregatedResults.get(i).length; j++) {
+                    aggregatedResults.get(i)[j] /= numFuzzyAgents;
+                }
+            }
+            aggregatedResults[i] /= results.size();
+        }
         }
     }
 }
