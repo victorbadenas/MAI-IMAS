@@ -88,13 +88,20 @@ public class Helper {
         }
     }
 
-    public static void writeFile(String fileName, double[] content) {
+    public static void writeFile(String fileName, ArrayList<double[]> content) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
-            for(Double d : content) {
-                writer.println(d);
+            for (int i=0; i<content.get(0).length; i++){
+                for (int j=0; j<content.size(); j++) {
+                    if (j < content.size() - 1) writer.print(content.get(j)[i] + ",");
+                    else writer.println(content.get(j)[i]);
+                }
             }
             writer.close();
+/*            for(Double d : content) {
+                writer.println(d);
+            }
+            writer.close()*/;
         } catch (Exception e) {
             System.out.println("Could not write results file.");
         }
@@ -132,8 +139,8 @@ public class Helper {
 
     public static String arrayToString(double[] doubleArray) {
         StringBuilder sb = new StringBuilder();
-        for (double s : doubleArray) {
-            sb.append(String.valueOf(s)).append(",");
+        for (double d : doubleArray) {
+            sb.append(d).append(",");
         }
         return sb.deleteCharAt(sb.length() - 1).toString();
     }

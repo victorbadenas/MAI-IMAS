@@ -17,7 +17,5 @@ public class InferenceResult {
         return result;
     }
 
-    public String getResultString() {
-        return Helper.arrayToString(this.result);
-    }
+    public String getResultString() { return Helper.arrayToString(this.result);}
 }
