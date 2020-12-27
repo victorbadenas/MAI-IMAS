@@ -25,7 +25,7 @@ The following aspects will be evaluated in this activity:
 ## Requirements
 
 - Maven 3+
-- Java 6+ (_Java 8 Recommended_)
+- Java 7+ (_Java 8 Recommended_)
 
 Operating System dependent installation instructions:
 
@@ -59,6 +59,12 @@ sudo apt-get install maven
 7. Repeat Step 4 to check that maven is correctly installed, issuing "mvn -version" command.
 
 For more information, check the following: [JDK Installation](https://www3.ntu.edu.sg/home/ehchua/programming/howto/JDK_Howto.html), [Maven Installation](https://mkyong.com/maven/how-to-install-maven-in-windows/).
+
+### MAC OS X
+
+```bash
+brew install maven
+```
 
 ## Execution instructions
 
