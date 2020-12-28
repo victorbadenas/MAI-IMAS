@@ -48,7 +48,7 @@ public class WaitHumanPetitions extends CyclicBehaviour {
                                                          "I_configuration2.txt", 
                                                          "I_car_configuration_5.txt", 
                                                          "I_car_configuration_10.txt", 
-                                                         "I_car_configuration_15.txt"));
+                                                         "I_car_configuration_25.txt"));
                 reader.addCompleter(new StringsCompleter("D_requests_quality.txt", 
                                                          "D_requests_tipper.txt", 
                                                          "D_car_requests.txt"));
