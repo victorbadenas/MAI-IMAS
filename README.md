@@ -55,8 +55,8 @@ sudo apt-get install maven
   4.3 Issue "javac -version", "java -version" commands to verify that JDK/JRE are properly installed and display their version
 
 5. Download [maven](https://maven.apache.org/download.cgi). You just have to unzip it to a folder, no installation process is required. 
-6. Repeat Step 3 to include in the `path` the folder you just unzipped in the last step.
-7. Repeat Step 4 to check that maven is correctly installed, issuing "mvn -version" command.
+6. Add the maven folder to the path variable by setting: `MAVEN_HOME=C:\Program Files\apache-maven-3.5.2` as an example, the same value to `M2_HOME` and finally add `%M2_HOME%\bin` to the path variable
+7. Repeat Step 4 to check that maven is correctly installed, issuing "mvn -version" command. This should state that maven is pointing to the jdk folder, if its pointing to the jre, restart your machine.
 
 For more information, check the following: [JDK Installation](https://www3.ntu.edu.sg/home/ehchua/programming/howto/JDK_Howto.html), [Maven Installation](https://mkyong.com/maven/how-to-install-maven-in-windows/).
 
@@ -68,6 +68,8 @@ brew install maven
 
 ## Execution instructions
 
+### Linux, MAC OS
+
 The first time you execute it, it's important to include the `Dmaven.wagon.http.ssl.insecure` and `maven.wagon.http.ssl.allowall` as the `jade` jar is downloaded from their own [jar respository](https://jade.tilab.com/maven/), which contains an incorrect SSL certificate that maven consider unacceptable. Therefore, this flags allow us to bypass this check and download the jar right away the first time.
 
 An alternative option would be installing the jade repository SSL certificates into our machine, which would be more complex.
@@ -75,6 +77,21 @@ An alternative option would be installing the jade repository SSL certificates i
 ```bash
 # Run this line only the first time (as it downloads all the dependencies using maven)
 mvn clean compile package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+# Run this alternative line the rest of times
+mvn clean compile package
+# Run FA-DSS
+java -jar target/imas-platform-1.0.0.jar -conf imas-platform.properties
+```
+
+### Windows
+
+The first time you execute it, it's important to include the `Dmaven.wagon.http.ssl.insecure` and `maven.wagon.http.ssl.allowall` as the `jade` jar is downloaded from their own [jar respository](https://jade.tilab.com/maven/), which contains an incorrect SSL certificate that maven consider unacceptable. Therefore, this flags allow us to bypass this check and download the jar right away the first time.
+
+An alternative option would be installing the jade repository SSL certificates into our machine, which would be more complex.
+
+```powershell
+# Run this line only the first time (as it downloads all the dependencies using maven)
+mvn clean compile package -define maven.wagon.http.ssl.insecure=true -define maven.wagon.http.ssl.allowall=true
 # Run this alternative line the rest of times
 mvn clean compile package
 # Run FA-DSS
